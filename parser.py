@@ -1,4 +1,4 @@
-# sop to something parser
+# sop (and soon sol) to numpy array parser
 
 import numpy as np
 
