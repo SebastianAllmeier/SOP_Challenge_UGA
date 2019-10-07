@@ -55,7 +55,7 @@ def parser(data_path, show_comments=False):
 
     if file_type == 'sop': # separate procedure by file type
         if show_comments:
-            print("parsing {0} file".format(file_type))
+            print("Parsing {0} file".format(file_type))
 
         # split rows (first row which contains dimension information will still be in first
         # entry of the list)
@@ -76,13 +76,13 @@ def parser(data_path, show_comments=False):
 
         # just some string output
         if show_comments:
-            print("Data was parsed into a ({0},{1}) matrix.".format(*output.shape))
+            print("Data was parsed into a ({0},{1}) matrix.\n".format(*output.shape))
 
         return output
 
     elif file_type == "sol":
         if show_comments:
-            print("parsing {0} file".format(file_type))
+            print("Parsing {0} file \n".format(file_type))
 
         # get rid of line break
         read_data = read_data[:-1]
