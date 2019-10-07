@@ -2,6 +2,34 @@
 
 import numpy as np
 
+def filenames(relative_paths=None):
+    """
+
+    :param relative_paths: tuple, relative paths to sol and sop files
+                            first entry -> path to .sol data, second -> path to .sop
+    :return: returns array of paths to data files
+    """
+    names = [
+        "ESC07",
+        "ESC78",
+        "R.700.1000.15",
+        "ry48p.2",
+        "ry48p.3"
+    ]
+
+    names_sol = []
+    names_sop = []
+
+    for name in names:
+        if relative_paths is not None:
+            names_sol += [relative_paths[0] + name + ".sol"]
+            names_sop += [relative_paths[1] + name + ".sop"]
+        else:
+            names_sol += [name + ".sol"]
+            names_sop += [name + ".sop"]
+
+    return names_sop, names_sol
+
 def parser(data_path, show_comments=False):
     """
 
@@ -11,9 +39,11 @@ def parser(data_path, show_comments=False):
     parser method parses sop !!and sol!!  files to a 2 or 1 dimensional numpy array
 
     NOTE: only .sop files as given in the course_benchmark_instance.zip file will work
-
-    TODO: include detection of sop, sol files and add skript for sol files
     """
+
+    # get filetype
+    file_type = data_path[-3:]
+
 
     # initial console output
     if show_comments:
@@ -23,30 +53,50 @@ def parser(data_path, show_comments=False):
     with open(data_path) as f:
         read_data = f.read()
 
-    # split rows (first row which contains dimension information will still be in first
-    # entry of the list)
-    row_strings = read_data.split('\t\n')
+    if file_type == 'sop': # separate procedure by file type
+        if show_comments:
+            print("parsing {0} file".format(file_type))
 
-    # separate dimension and first row and save / replace them
-    dimension, row_strings[0] = row_strings[0].split('\n')
+        # split rows (first row which contains dimension information will still be in first
+        # entry of the list)
+        row_strings = read_data.split('\t\n')
 
-    #convert dimension to integer
-    dimension = int(dimension)
+        # separate dimension and first row and save / replace them
+        dimension, row_strings[0] = row_strings[0].split('\n')
 
-    # create empty np array with matching output size
-    output = np.zeros(shape=(dimension, dimension))
+        # convert dimension to integer
+        dimension = int(dimension)
 
-    # fill output array with values
-    for i in range(dimension):
-        output[i, :] = np.fromstring(row_strings[i], dtype=int, sep='\t')
+        # create empty np array with matching output size
+        output = np.zeros(shape=(dimension, dimension))
 
-    # just some string output
-    if show_comments:
-        print("Data was parsed into a ({0},{1}) matrix.".format(*output.shape))
+        # fill output array with values
+        for i in range(dimension):
+            output[i, :] = np.fromstring(row_strings[i], dtype=int, sep='\t')
 
-    return output
+        # just some string output
+        if show_comments:
+            print("Data was parsed into a ({0},{1}) matrix.".format(*output.shape))
+
+        return output
+
+    elif file_type == "sol":
+        if show_comments:
+            print("parsing {0} file".format(file_type))
+
+        # get rid of line break
+        read_data = read_data[:-1]
+
+        # values to np array
+        values = np.fromstring(read_data, dtype=int, sep=' ')
+
+        return values
+
+
 
 
 if __name__ == "__main__":
-    arcs = parser('Data/course_benchmark_instances/ESC07.sop', True)
+    arcs = parser('../Data/course_benchmark_instances/ESC07.sop', True)
+    sol = parser('../Data/solutions/ESC07.sol', True)
+
     print("DONE")
