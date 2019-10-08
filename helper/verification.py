@@ -2,7 +2,16 @@
 from helper.parser import parser, filenames
 
 
-def solution_valid(arcs, solution):
+def check_solution(arcs, solution):
+    """
+
+    :param arcs: weights of arcs of the graph - 2 dim numpy array
+    :param solution: solution vector - 1 dim numpy array
+    :return: value of the solution; if -1 is gets returned, solution is not valid
+
+    Method to check whether a solution is valid in terms of length, precedence constraints and permutation property.
+    Returns the value of the Solution.
+    """
 
     value = 0
 
@@ -39,8 +48,8 @@ def solution_valid(arcs, solution):
 if __name__ == "__main__":
 
     # directory paths
-    sol_path = "Data/solutions/"
-    sop_path = "Data/course_benchmark_instances/"
+    sol_path = "../Data/solutions/"
+    sop_path = "../Data/course_benchmark_instances/"
 
     # get filenames (files where solutions are given)
     sop_files, sol_files = filenames([sol_path, sop_path])
@@ -53,7 +62,7 @@ if __name__ == "__main__":
         arcs = parser(sop_files[i], True)
         solution = parser(sol_files[i], True)
         instances += [(arcs, solution)]
-        value = solution_valid(arcs, solution)
-        print("The solution value is: " + value + "\n")
+        value = check_solution(arcs, solution)
+        print("The solution value is: " + str(int(value)) + "\n")
 
     print("")
