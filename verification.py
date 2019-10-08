@@ -1,40 +1,36 @@
 # verification of given solutions
 from helper.parser import parser, filenames
 
+
 def solution_valid(arcs, solution):
 
     value = 0
 
     # check if shapes coincide
     if solution.shape[0] != arcs.shape[0]:
-        value = -1
-        return value
+        return -1
 
     # check if values are in valid range
     if solution.max() >= solution.shape[0]:
-        value = -1
-        return value
+        return -1
 
     # check that all solution is a permutation (no value is allowed twice)
     if len(set(solution)) != solution.shape[0]:
-        value = -1
-        return value
+        return -1
 
     for i in range(solution.shape[0]-1):  # cycle through solution and check constraints
         arc_weight = arcs[solution[i], solution[i+1]]
 
         # check if arc_weight is valid value
-        if arc_weight == -1 or arc_weight == 999:
-            value = -1
-            return value
+        if arc_weight == -1 or arc_weight >= 500000:
+            return -1
 
         for j in range(arcs.shape[0]):
             # check precedence constraints
             if arcs[solution[i], j] == -1:  # check row i for constraints
                 if j not in solution[:i]:
                     # if constraint is not satisfied in solution
-                    value = -1
-                    return value
+                    return -1
 
         value += arc_weight
 
