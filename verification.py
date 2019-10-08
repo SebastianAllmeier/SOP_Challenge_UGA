@@ -30,7 +30,7 @@ def solution_valid(arcs, solution):
 
         for j in range(arcs.shape[0]):
             # check precedence constraints
-            if arcs[i, j] == -1:  # check row i for constraints
+            if arcs[solution[i], j] == -1:  # check row i for constraints
                 if j not in solution[:i]:
                     # if constraint is not satisfied in solution
                     value = -1
@@ -53,9 +53,11 @@ if __name__ == "__main__":
     instances = []
 
     # fill arrays
-    for i in range(len(sop_files)-1):
-        arcs = [parser(sop_files[i], True)]
-        solution = [parser(sol_files[i], True)]
+    for i in range(len(sop_files)):
+        arcs = parser(sop_files[i], True)
+        solution = parser(sol_files[i], True)
         instances += [(arcs, solution)]
+        value = solution_valid(arcs, solution)
+        print(value)
 
     print("")
