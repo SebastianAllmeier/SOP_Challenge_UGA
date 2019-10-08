@@ -58,6 +58,6 @@ if __name__ == "__main__":
         solution = parser(sol_files[i], True)
         instances += [(arcs, solution)]
         value = solution_valid(arcs, solution)
-        print(value)
+        print("The solution value is: " + value + "\n")
 
     print("")
