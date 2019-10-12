@@ -14,8 +14,8 @@ if __name__ == "__main__":
 
     # fill arrays
     for i in range(len(sop_files)-1):
-        arcs = [parser(sop_files[i], True)]
-        solution = [parser(sol_files[i], True)]
+        arcs = parser(sop_files[i], True)
+        solution = parser(sol_files[i], True)
         instances += [(arcs, solution)]
 
     print("DONE")
