@@ -1,4 +1,5 @@
 from helper.parser import parser, filenames
+from mip.model import *  # coin Or python solver
 
 
 if __name__ == "__main__":
