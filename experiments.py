@@ -1,6 +1,8 @@
 from helper.parser import parser, filenames
 from mip.model import *  # coin Or python solver
 import numpy as np
+from sys import stdout as out
+from itertools import product
 
 
 def get_prec_matrix(arcs):
@@ -42,7 +44,7 @@ def add_variables(model, n=0):
     return [[model.add_var(var_type=BINARY) for j in v] for i in v]
 
 
-def add_constraints(model, x, prec_matrix):
+def add_constraints(model, x, y, prec_matrix):
     """
     Add necessary constraints to the model.
 
@@ -75,6 +77,13 @@ def add_constraints(model, x, prec_matrix):
     for j in V:
         model += xsum(x[i][j]*prec_matrix[i, j] for i in V) == 0
 
+    n = prec_matrix.shape[0]
+    # TODO: no subpaths/cicles/subtours are allowed!!
+    for (i, j) in set(product(set(V) - {0}, set(V) - {0})):
+        model += y[i] - (n+1)*x[i][j] >= y[j]-n
+
+
+
 
 
 
@@ -103,18 +112,52 @@ def plainProblem(arcs, filter="easy"):
     n = cost_matrix.shape[0]
 
     # add decision variables
-    x = add_variables(model, n)  # TODO: don't use an extra function here
+    # add one descision variable for each connection i,j of nodes indicating whether
+    # route from i to j was taken
+    v = range(n)
+    x = [[model.add_var(var_type=BINARY) for j in v] for i in v]
+    # add variables for sub-tour elimination
+    y = [model.add_var() for i in v]
+
 
     # add objective
     model.objective = minimize(xsum(cost_matrix[i, j]*x[i][j] for i in range(n) for j in range(n)))
 
-    add_constraints(model, x, prec_matrix)
+    add_constraints(model, x, y, prec_matrix)
 
     print("Solving...")
 
     model.optimize(max_seconds = 30)
 
-    print("Done; value: {}".format(model.objective_value))
+    if model.num_solutions:
+        out.write('Path with total cost {} was found.'.format(model.objective_value))
+        path = [0]
+        print()
+        if False: # to print out the decision variables and their connection
+            for i in range(n):
+                for j in range(n):
+                    out.write("{} ".format(x[i][j].x))
+                    if x[i][j].x >= 0.99:
+                        a, b = i, j
+                out.write(" from {} to {}".format(a, b))
+                print()
+        while path[-1] != cost_matrix.shape[0]-1:
+            path += [j for j in range(n) if x[path[-1]][j].x >= 0.99]
+
+        out.write("-----------------\n\n")
+        out.write("The path takes the following route: \n")
+        for i, vertex in enumerate(path):
+            if ((i) % 10) == 0:
+                out.write('\n')
+            if vertex != cost_matrix.shape[0]-1:
+                out.write('{}\t -> '.format(vertex))
+            else:
+                out.write('{}'.format(vertex))
+        out.write(';\n\nLength of the path: {}\n\n'.format(len(path)))
+        out.write('-----------------\n\n')
+    #print("Done; value: {}".format(model.objective_value))
+
+
 
 
 

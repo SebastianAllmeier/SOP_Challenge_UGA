@@ -2,7 +2,7 @@
 
 SOP Challenge; Sebastian, Felix
 
-Information:
+**Information**:
 
 * regarding the **project files**:
   * methods in helper/parser.py parse .sol and .sop data to numpy arrays
