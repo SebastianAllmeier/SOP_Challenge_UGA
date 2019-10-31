@@ -24,7 +24,7 @@ def get_cost_matrix(arcs):
     (no recedence constraints included in this matrix)
     """
 
-    return np.multiply(arcs, arcs != -1)
+    return np.multiply(arcs, arcs != -1).astype(int)
 
 
 def add_variables(model, n=0):
@@ -51,30 +51,29 @@ def add_constraints(model, x, prec_matrix):
     :return:
     """
 
-    # TODO: something is not working...
-    # wrong constraints ?? wrong indexing?? missing constraints??
-
     V = range(prec_matrix.shape[0])
 
     # we will never move away from the last node
-    # TODO: implement nicely, don't use a hack like this...
     # we can only leave every node once
     for i in range(prec_matrix.shape[0]-1):
         model += xsum(x[i][j] for j in V) == 1
 
-    #model += xsum(x[prec_matrix.shape[0]-1][j] for j in V) == 0
+    model += xsum(x[i][j] for j in V for i in V) == prec_matrix.shape[0]-1
 
     # we can only enter every node once
     # we never enter node 0 (sine we always start there
-    # TODO: same as before...
-    for j in range(0, prec_matrix.shape[0]):
+    for j in range(1, prec_matrix.shape[0]):
         model += xsum(x[i][j] for i in V) == 1
 
-    #model += xsum(x[j][0] for j in V) == 0
-
+    for i in V:
+        model += x[i][i] == 0
 
     # add precedence constraints
-    model += xsum(x[i][j]*prec_matrix[i, j] for i in V for j in V) == 0
+    # for each vertex, we can only reach it if all precedence constraints are satisfied
+    # for each node look at incoming connections and make sure that there is no precedence constraints
+    # on the connection
+    for j in V:
+        model += xsum(x[i][j]*prec_matrix[i, j] for i in V) == 0
 
 
 
@@ -87,7 +86,7 @@ def plainProblem(arcs):
     :param arcs: matrix of arcs which includes precedence constrains and costs
     :return: model of the plain problem without any simplifications
     """
-    if arcs.shape[0] >= 500:
+    if arcs.shape[0] >= 1000:
         return
 
     cost_matrix = get_cost_matrix(arcs)
