@@ -79,26 +79,34 @@ def add_constraints(model, x, prec_matrix):
 
 
 
-def plainProblem(arcs):
+def plainProblem(arcs, filter="easy"):
     """
     Generate a model for the plain problem
 
     :param arcs: matrix of arcs which includes precedence constrains and costs
     :return: model of the plain problem without any simplifications
     """
-    if arcs.shape[0] >= 1000:
-        return
+    # filter easy
+    if filter == "easy":
+        if arcs.shape[0] >= 500:
+            print("Problem has more than 500 verticies and will not be solved due to its size.")
+            return
 
+    # separate cost and precedence matrix
     cost_matrix = get_cost_matrix(arcs)
     prec_matrix = get_prec_matrix(arcs)
 
+    #initialize model (MIP coin OR solver)
     model = Model()  # initialize model from mip solver
 
+    # get number of verticies
     n = cost_matrix.shape[0]
 
+    # add decision variables
     x = add_variables(model, n)  # TODO: don't use an extra function here
 
-    model.objective = minimize(xsum(cost_matrix[i,j]*x[i][j] for i in range(n) for j in range(n)))
+    # add objective
+    model.objective = minimize(xsum(cost_matrix[i, j]*x[i][j] for i in range(n) for j in range(n)))
 
     add_constraints(model, x, prec_matrix)
 
