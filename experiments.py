@@ -44,7 +44,7 @@ def add_variables(model, n=0):
     return [[model.add_var(var_type=BINARY) for j in v] for i in v]
 
 
-def add_constraints(model, x, y, prec_matrix):
+def add_constraints(model, x, z, prec_matrix):
     """
     Add necessary constraints to the model.
 
@@ -54,6 +54,7 @@ def add_constraints(model, x, y, prec_matrix):
     """
 
     V = range(prec_matrix.shape[0])
+    n =  prec_matrix.shape[0]
 
     # we will never move away from the last node
     # we can only leave every node once
@@ -74,13 +75,35 @@ def add_constraints(model, x, y, prec_matrix):
     # for each vertex, we can only reach it if all precedence constraints are satisfied
     # for each node look at incoming connections and make sure that there is no precedence constraints
     # on the connection
-    for j in V:
-        model += xsum(x[i][j]*prec_matrix[i, j] for i in V) == 0
+    #for j in V:
+    #    model += xsum(x[i][j]*prec_matrix[i, j] for i in V) == 0
 
-    n = prec_matrix.shape[0]
+    model += xsum(z[0][j] for j in V) == n-1
+
+    for i in set(V) - {0}:
+        model += ( xsum(z[i][j] for j in V) - xsum(z[j][i] for j in V) ) == -1
+
+    for i in V:
+        for j in V:
+            model += z[i][j] <= (n-1)*x[i][j]
+
+    for i in set(V) - {0}:
+        for j in set(V) - {0}:
+            if prec_matrix[i][j]:
+                model += xsum(z[l][j] for l in V) >= xsum(z[k][i] for k in V)
+
+
+
+
+
+    #n = prec_matrix.shape[0]
     # TODO: no subpaths/cicles/subtours are allowed!!
-    for (i, j) in set(product(set(V) - {0}, set(V) - {0})):
-        model += y[i] - (n+1)*x[i][j] >= y[j]-n
+    #for (i, j) in set(product(set(V) - {0}, set(V) - {0})):
+    #    model += y[i] - (n+1)*x[i][j] >= y[j]-n
+
+
+
+
 
 
 
@@ -117,17 +140,18 @@ def plainProblem(arcs, filter="easy"):
     v = range(n)
     x = [[model.add_var(var_type=BINARY) for j in v] for i in v]
     # add variables for sub-tour elimination
-    y = [model.add_var() for i in v]
+    # y = [model.add_var() for i in v]
+    z = [[model.add_var(var_type=INTEGER) for j in v] for i in v]
 
 
     # add objective
     model.objective = minimize(xsum(cost_matrix[i, j]*x[i][j] for i in range(n) for j in range(n)))
 
-    add_constraints(model, x, y, prec_matrix)
+    add_constraints(model, x, z, prec_matrix)
 
     print("Solving...")
 
-    model.optimize(max_seconds = 30)
+    model.optimize(max_seconds = 1000)
 
     if model.num_solutions:
         out.write('Path with total cost {} was found.'.format(model.objective_value))
