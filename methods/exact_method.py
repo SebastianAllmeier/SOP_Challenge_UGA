@@ -1,9 +1,9 @@
-from helper.parser import parser, filenames
+# exact method for the sop problem
+
 from mip.model import *  # coin Or python solver
 import numpy as np
 from sys import stdout as out
 from itertools import product
-
 
 def get_prec_matrix(arcs):
     """
@@ -94,35 +94,21 @@ def add_constraints(model, x, z, prec_matrix):
 
 
 
-
-
-    #n = prec_matrix.shape[0]
+    # n = prec_matrix.shape[0]
     # TODO: no subpaths/cicles/subtours are allowed!!
-    #for (i, j) in set(product(set(V) - {0}, set(V) - {0})):
+    # for (i, j) in set(product(set(V) - {0}, set(V) - {0})):
     #    model += y[i] - (n+1)*x[i][j] >= y[j]-n
 
 
 
 
-
-
-
-
-
-
-
-def plainProblem(arcs, filter="easy"):
+def plainProblem(arcs):
     """
     Generate a model for the plain problem
 
     :param arcs: matrix of arcs which includes precedence constrains and costs
     :return: model of the plain problem without any simplifications
     """
-    # filter easy
-    if filter == "easy":
-        if arcs.shape[0] >= 500:
-            print("Problem has more than 500 verticies and will not be solved due to its size.")
-            return
 
     # separate cost and precedence matrix
     cost_matrix = get_cost_matrix(arcs)
@@ -180,28 +166,3 @@ def plainProblem(arcs, filter="easy"):
         out.write(';\n\nLength of the path: {}\n\n'.format(len(path)))
         out.write('-----------------\n\n')
     #print("Done; value: {}".format(model.objective_value))
-
-
-
-
-
-
-if __name__ == "__main__":
-    # directory paths
-    sol_path = "Data/solutions/"
-    sop_path = "Data/course_benchmark_instances/"
-
-    # get filenames (files where solutions are given)
-    sop_files, sol_files = filenames([sol_path, sop_path])
-
-    # initialize array arcs and solutions
-    instances = []
-
-    # fill arrays
-    for i in range(len(sop_files) - 1):
-        arcs = parser(sop_files[i], True)
-        solution = parser(sol_files[i], True)
-        instances += [(arcs, solution)]
-        plainProblem(arcs)
-
-    print("DONE")
