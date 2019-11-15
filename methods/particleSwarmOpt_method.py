@@ -11,7 +11,7 @@ def check_permutation(perm, lowest=1):
     :param lowest: the lwoest value for permutation (can be 0 or 1).
     :return: True is a is a valid permutation or False otherwise.
     """
-    assert lowest in [0, 1], '[operations::check_permutation] lowest should be 0 or 1'
+    assert lowest in [0, 1], '[check_permutation] lowest should be 0 or 1'
     n = len(perm)
     if n <= 1:
         return False
@@ -29,7 +29,6 @@ def random_round(x):
     u = random.uniform(a = 0.0, b = 1.0)
     return math.floor(x) if u < 0.5 else math.ceil(x)
 
-
 def op_perm_sub_perm(a, b, allow_checks):
     """
     Performs operation velocity = perm - perm.
@@ -41,9 +40,9 @@ def op_perm_sub_perm(a, b, allow_checks):
     :return: v = a - b = list of insertion moves that need to be applied to b to obtain a.
     """
     if allow_checks:
-        assert check_permutation(a), '[operations::difference] first permutation is not valid one'
-        assert check_permutation(b), '[operations::difference] second permutation is not valid one'
-        assert len(a) == len(b), '[operations::difference] both permutations must have same size'
+        assert check_permutation(a), '[op_perm_sub_perm] first permutation is not valid one'
+        assert check_permutation(b), '[op_perm_sub_perm] second permutation is not valid one'
+        assert len(a) == len(b), '[op_perm_sub_perm] both permutations must have same size'
 
     velocity = []
     for j, x in enumerate(b):
@@ -62,7 +61,7 @@ def op_scalar_mul_velocity(c, v):
     :param v: the velocity vector to be multiplied with c.
     :return: a new velocity set w = c * v
     """
-    assert c > 0, '[operations::scalar_multiplication] the constant c must be positive'
+    assert c > 0, '[op_scalar_mul_velocity] the constant c must be positive'
     if c < 1:
         n = len(v)
         size = math.ceil(c * n)
