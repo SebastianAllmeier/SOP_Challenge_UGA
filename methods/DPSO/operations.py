@@ -1,7 +1,8 @@
 import math
 import random
+from typing import List
 
-def check_permutation(perm, lowest=1):
+def check_permutation(perm : list, lowest : int = 1) -> bool:
     """
     Permutation a is valid if it has length n > 1 and contains all numbers from lowest to n+lowest.
     :param perm: the permutation to be checked.
@@ -17,7 +18,7 @@ def check_permutation(perm, lowest=1):
             return False
     return True
 
-def random_round(x):
+def random_round(x : float) -> int:
     """
     Randommy round x to floor(x) or ceil(x) with probability 0.5.
     :param x: the number to be rounded.
@@ -27,7 +28,7 @@ def random_round(x):
     return math.floor(x) if u < 0.5 else math.ceil(x)
 
 
-def op_perm_sub_perm(a, b, allow_checks):
+def op_perm_sub_perm(a : list, b : list, allow_checks : bool) -> List[tuple]:
     """
     Performs operation velocity = perm - perm.
     Performs subtraction of two permutations. The result is velocity vector.
@@ -49,7 +50,7 @@ def op_perm_sub_perm(a, b, allow_checks):
             velocity.append((x, i-j))
     return velocity
 
-def op_scalar_mul_velocity(c, v):
+def op_scalar_mul_velocity(c : float, v : List[tuple]) -> List[tuple]:
     """
     Performs operation velocity = scalar * velocity.
     Performs multiplication w = c * v in the following way:
@@ -71,7 +72,7 @@ def op_scalar_mul_velocity(c, v):
         return w
     return v
 
-def op_perm_sum_velocity(x, v):
+def op_perm_sum_velocity(x : list, v : List[tuple]) -> list:
     """
     Performs operation perm = perm + velocity.
     Apply insertion moves (IMs) in v to x.
@@ -88,12 +89,12 @@ def op_perm_sum_velocity(x, v):
         y.insert(insert_position, node)
     return y
 
-def op_perm_fix(x, R):
+def op_perm_fix(x : list, P : List[tuple]) -> list:
     """
     Force x satisfy precedence constraints in R by changing as less as possible the order of nodes in x.
     In case x already satisfies precedence constraints in R, then it won't be modified in any way.
     :param x: the permutation to be modified to respect precedence constraints in R.
-    :param R: the precedence constraints: R = {(i,j) meaning that i must precede j in permutation}.
+    :param P: the precedence constraints: R = {(i,j) meaning that i must precede j in permutation}.
     :return: y = the permutation obtained from x that respects now precedence constraints R.
     """
     n = len(x)
@@ -104,7 +105,7 @@ def op_perm_fix(x, R):
         f = 0
         for h in range(n): # the paper goes from 1 to n-1 (if there are problems, recheck!)
             i = y[h]
-            if (i, j) in R and h > f:
+            if (i, j) in P and h > f:
                 f = h
         if f < k:
             k = k - 1
