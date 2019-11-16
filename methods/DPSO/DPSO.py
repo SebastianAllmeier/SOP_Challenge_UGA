@@ -157,30 +157,8 @@ class DPSO:
             print(f'step {0:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
         for it in range(1, iterations + 1):
             for i in range(self.pop_size):
-                # save particle because we will compute velocity at the end
-                old_particle = self.particles[i].copy()
-
-                # applyformula: v(k+1) = [inertia * v(k)] + [personal * rand() * (p(i) - x(i))] + [social * rand() * (g - x(i))]
-
-                # compute each term inside square brackets
-                velocity_inertia = op_scalar_mul_velocity(c=self.coef_inertia, v=self.velocities[i])
-
-                diff_velocity_personal = op_perm_sub_perm(self.pbest[i], self.particles[i])
-                velocity_personal = op_scalar_mul_velocity(self.coef_personal * U(0, 1), diff_velocity_personal)
-
-                diff_velocity_social = op_perm_sub_perm(self.gbest, self.particles[i])
-                velocity_social = op_scalar_mul_velocity(self.coef_social * U(0, 1), diff_velocity_social)
-
-                # apply each velocity individually to particle because we don't have a velocity + velocity operator
-                self.particles[i] = op_perm_sum_velocity(self.particles[i], velocity_inertia)
-                self.particles[i] = op_perm_sum_velocity(self.particles[i], velocity_personal)
-                self.particles[i] = op_perm_sum_velocity(self.particles[i], velocity_social)
-
-                # fix current particle so that it repects precedence constraints
-                self.particles[i] = op_perm_fix(x=self.particles[i], P=self.precedences)
-
-                # compute velocity that transforms old_particle into self.patricles[i]
-                self.velocities[i] = op_perm_sub_perm(self.particles[i], old_particle)
+                param = (self.particles[i], self.velocities[i], self.pbest[i], self.gbest)
+                self.particles[i], self.velocities[i] = self._optimization_step(param)
 
                 cost = self.cost(self.particles[i])
 
@@ -194,5 +172,31 @@ class DPSO:
             if verbose:
                 print(f'step {it:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
 
-    def _optimization_step(self):
-        pass
+    def _optimization_step(self, param):
+        particle, velocity, pbest, gbest = param
+        # save particle because we will compute velocity at the end
+        old_particle = particle.copy()
+
+        # apply formula: v(k+1) = [inertia * v(k)] + [personal * rand() * (p(i) - x(i))] + [social * rand() * (g - x(i))]
+
+        # compute each term inside square brackets
+        velocity_inertia = op_scalar_mul_velocity(c=self.coef_inertia, v=velocity)
+
+        diff_velocity_personal = op_perm_sub_perm(pbest, particle)
+        velocity_personal = op_scalar_mul_velocity(self.coef_personal * U(0, 1), diff_velocity_personal)
+
+        diff_velocity_social = op_perm_sub_perm(gbest, particle)
+        velocity_social = op_scalar_mul_velocity(self.coef_social * U(0, 1), diff_velocity_social)
+
+        # apply each velocity individually to particle because we don't have a velocity + velocity operator
+        particle = op_perm_sum_velocity(particle, velocity_inertia)
+        particle = op_perm_sum_velocity(particle, velocity_personal)
+        particle = op_perm_sum_velocity(particle, velocity_social)
+
+        # fix current particle so that it repects precedence constraints
+        particle = op_perm_fix(x=particle, P=self.precedences)
+
+        # compute velocity that transforms old_particle into self.patricles[i]
+        velocity = op_perm_sub_perm(particle, old_particle)
+
+        return particle, velocity
