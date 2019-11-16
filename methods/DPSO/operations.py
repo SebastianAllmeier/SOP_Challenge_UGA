@@ -28,9 +28,9 @@ def random_round(x : float) -> int:
     return math.floor(x) if u < 0.5 else math.ceil(x)
 
 
-def op_perm_sub_perm(a : list, b : list, allow_checks : bool) -> List[tuple]:
+def op_perm_sub_perm(a : list, b : list, allow_checks : bool = False) -> List[tuple]:
     """
-    Performs operation velocity = perm - perm.
+    Performs operation velocity = a - b.
     Performs subtraction of two permutations. The result is velocity vector.
     A velocity vector is a list of tuples (i,d) where i=node and d=displacement.
     :param a: the first permutation.
