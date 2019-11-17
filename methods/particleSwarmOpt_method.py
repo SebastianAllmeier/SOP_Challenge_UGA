@@ -24,13 +24,19 @@ from helper.parser import parser
 # check_if_start_and_end_nodes_are_always_first_and_last()
 
 if __name__ == "__main__":
+    # file_name = 'ex'
     # file_name = 'ESC07'
     file_name = 'ESC63'
-    # file_name = 'R.700.1000.1'
+    # file_name = 'ESC78'
+    # file_name = 'R.700.1000.15'
+    # file_name = 'ry48p.2'
+    # file_name = 'ry48p.3'
+    # file_name = 'br17.10'
 
     arcs = parser(f'../Data/course_benchmark_instances/{file_name}.sop', True)
-    dpso = DPSO(pop_size=20, coef_inertia=3, coef_personal=5, coef_social=10, particle_size=len(arcs), weights_matrix=arcs)
-    dpso.optimize(iterations=100, parallelize=True, verbose=True)
+    dpso = DPSO(pop_size=30, coef_inertia=4.5, coef_personal=4.5, coef_social=8, particle_size=len(arcs), weights_matrix=arcs)
+    dpso.file_name = file_name
+    dpso.optimize(iterations=1000, parallelize=True, verbose=True, auto_adjust_social_coef=True)
 
     # print('start', dpso.node_start)
     # print('end', dpso.node_end)
