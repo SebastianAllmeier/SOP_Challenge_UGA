@@ -1,9 +1,62 @@
 # exact method for the sop problem
 
 from mip.model import *  # coin Or python solver
+from mip.callbacks import ConstrsGenerator, CutPool
 import numpy as np
 from sys import stdout as out
 from itertools import product
+import networkx as nx
+
+
+class SubTourCutGenerator(ConstrsGenerator):
+    def __init__(self, prec_constraints_matrix, z):
+        self.prec = prec_constraints_matrix
+        self.z = z
+
+    #def __init__(self, Fl: List[Tuple[int, int]]):
+    #    self.F = Fl
+
+    def generate_constrs(self, model: Model):
+        V = range(self.prec.shape[0])
+        n = self.prec.shape[0]
+        cp = CutPool()
+        r = []
+        s = []
+
+        valid = True # implement checker / add checker
+        for v in model.vars:
+            if v.name.startswith('x') and v.x > 0:
+                i = int(v.name.split('(')[1].split(',')[0])
+                j = int(v.name.split(')')[0].split(',')[1])
+                r += [(v,(i, j))]  # add  current path
+
+        if not valid:
+
+            for (v, (i,j)) in r:
+                cut = xsum(self.z[i,l] for (k,l) in r) - xsum(self.z[l,i] for (k,l) in r) == -1
+                cp.add(cut)
+
+            #for i in set(V) - {0}:  # for every visited node leave one package (out one less than in)
+            #    model += (xsum(z[i][j] for j in V) - xsum(z[j][i] for j in V)) == -1
+
+            for (v, (i,j)) in r:  # only variables which are included in the path can be greater 0
+                cut = self.z[i][j] <= (n - 1)*v.x
+                cp.add(cut)
+
+            for (v, (i,j)) in r:  # if j must precede i, more packages must reach j than i (visit j before i)
+                if self.prec[i][j]:
+                    cut = xsum(self.z[k][j] for (v, (k,l)) in r) >= xsum(self.z[k][i] for (v, (k,l)) in r)
+                    cp.add(cut)
+
+                    if len(cp.cuts) > 256:
+                        for cut in cp.cuts:
+                            model += cut
+                        return
+
+        for cut in cp.cuts:
+            model += cut
+        return
+
 
 def get_prec_matrix(arcs):
     """
@@ -75,31 +128,25 @@ def add_constraints(model, x, z, prec_matrix):
     # for each vertex, we can only reach it if all precedence constraints are satisfied
     # for each node look at incoming connections and make sure that there is no precedence constraints
     # on the connection
-    #for j in V:
+    # for j in V:
     #    model += xsum(x[i][j]*prec_matrix[i, j] for i in V) == 0
 
-    model += xsum(z[0][j] for j in V) == n-1
+    model += xsum(z[0][j] for j in V) == n-1  # have n-1 packages leaving from 0
+    # keep this constraint ( 1 constraint )
 
-    for i in set(V) - {0}:
+    for i in set(V) - {0}:  # for every visited node leave one package (out one less than in)
         model += ( xsum(z[i][j] for j in V) - xsum(z[j][i] for j in V) ) == -1
+    # keep this contraint ( n constraints )
 
-    for i in V:
+    for i in V:  # only variables which are included in the path can be greater 0
         for j in V:
             model += z[i][j] <= (n-1)*x[i][j]
+    # keep constraint
 
-    for i in set(V) - {0}:
+    for i in set(V) - {0}:  # if j must precede i, more packages must reach j than i (visit j before i)
         for j in set(V) - {0}:
             if prec_matrix[i][j]:
                 model += xsum(z[l][j] for l in V) >= xsum(z[k][i] for k in V)
-
-
-
-    # n = prec_matrix.shape[0]
-    # TODO: no subpaths/cicles/subtours are allowed!!
-    # for (i, j) in set(product(set(V) - {0}, set(V) - {0})):
-    #    model += y[i] - (n+1)*x[i][j] >= y[j]-n
-
-
 
 
 def plainProblem(arcs):
@@ -114,20 +161,20 @@ def plainProblem(arcs):
     cost_matrix = get_cost_matrix(arcs)
     prec_matrix = get_prec_matrix(arcs)
 
-    #initialize model (MIP coin OR solver)
+    # initialize model (MIP coin OR solver)
     model = Model()  # initialize model from mip solver
 
-    # get number of verticies
+    # get number of vertices
     n = cost_matrix.shape[0]
 
     # add decision variables
-    # add one descision variable for each connection i,j of nodes indicating whether
+    # add one decision variable for each connection i,j of nodes indicating whether
     # route from i to j was taken
     v = range(n)
-    x = [[model.add_var(var_type=BINARY) for j in v] for i in v]
+    x = [[model.add_var(var_type=BINARY, name='x({},{})'.format(i, j)) for j in v] for i in v]
     # add variables for sub-tour elimination
     # y = [model.add_var() for i in v]
-    z = [[model.add_var(var_type=INTEGER) for j in v] for i in v]
+    z = [[model.add_var(var_type=INTEGER, name='z({},{})'.format(i, j)) for j in v] for i in v]
 
 
     # add objective
@@ -143,6 +190,7 @@ def plainProblem(arcs):
         out.write('Path with total cost {} was found.'.format(model.objective_value))
         path = [0]
         print()
+        """
         if False: # to print out the decision variables and their connection
             for i in range(n):
                 for j in range(n):
@@ -151,6 +199,7 @@ def plainProblem(arcs):
                         a, b = i, j
                 out.write(" from {} to {}".format(a, b))
                 print()
+        """
         while path[-1] != cost_matrix.shape[0]-1:
             path += [j for j in range(n) if x[path[-1]][j].x >= 0.99]
 
