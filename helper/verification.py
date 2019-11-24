@@ -7,7 +7,7 @@ def check_solution(arcs, solution):
 
     :param arcs: weights of arcs of the graph - 2 dim numpy array
     :param solution: solution vector - 1 dim numpy array
-    :return: value of the solution; if -1 is gets returned, solution is not valid
+    :return: value of the solution; if -1 gets returned, solution is not valid
 
     Method to check whether a solution is valid in terms of length, precedence constraints and permutation property.
     Returns the value of the Solution.
