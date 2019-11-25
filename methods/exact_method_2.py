@@ -52,10 +52,7 @@ def subtourelim(model, where):
                     model.cbLazy(helper_i_j - helper_j_i >= 0)
                     #m.addConstr(helper(j, i) - helper(i, j) >= 0)
         """
-        #for index_1, i in enumerate(tour):
-        #    for j in range(n):
-        #        if prec_matrix[i, j] == 1:
-        #            model.cbLazy(model._vars[i, j] == 0)
+
 
 def get_whole_tour(edges):
     unvisited = list(range(n))
@@ -68,8 +65,6 @@ def get_whole_tour(edges):
             thiscycle.append(current)
             unvisited.remove(current)
             neighbors = [j for i, j in edges.select(current, '*') if j in unvisited]
-        #if len(cycle) > len(thiscycle):
-        #    cycle = thiscycle
         cycle += thiscycle
     return cycle
 
@@ -99,6 +94,7 @@ def gurobi_problem(arcs):
     m = Model()
 
     # separate cost and precedence matrix
+    # make global for subtourelim
     global cost_matrix
     global prec_matrix
 
@@ -128,7 +124,7 @@ def gurobi_problem(arcs):
             helper[i,j] = m.addVar(name='helper({},{})'.format(i,j), vtype=GRB.INTEGER)
 
 
-    ## add easy constraints
+    ## add constraints
     # sub tour and precedence constraints will be added as lazy constraints
 
     # can only leave every node once
@@ -161,29 +157,57 @@ def gurobi_problem(arcs):
                 m.addConstr(helper.sum('*', j) - helper.sum('*', i) >= 0)
 
 
+    # set up final model properties
     m._vars = vars
+
+    # use lazy constraints
     m.Params.lazyConstraints = 1
 
-    m.setParam('TimeLimit', 10 * 60)
+    # set time limit
+    m.setParam('TimeLimit', 20 * 60)
 
+    #optimize
     m.optimize(subtourelim)
 
-    vals = m.getAttr('x', vars)
-    selected = tuplelist((i, j) for i, j in vals.keys() if vals[i, j] > 0.5)
 
-    tour = subtour(selected)
-    assert len(tour) == n
+    # console output and saving results with respect to opt. outcomes
+    if m.SolCount > 0:
+        vals = m.getAttr('x', vars)
+        selected = tuplelist((i, j) for i, j in vals.keys() if vals[i, j] > 0.5)
 
-    print('')
-    print('Best tour found: %s' % str(tour))
-    print('Cost of the tour: %g' % m.objVal)
-    print('')
+        tour = subtour(selected)
+        assert len(tour) == n
 
-    from helper.verification import check_solution
+        if m.status == 2:
+            print("Optimal Solution was found.")
+        if m.status == 9:
+            print("Time limit was exceeded.")
 
-    print("Solution valid: " + str(check_solution(arcs, np.array(tour)) >= 0) + "\n")
+        print('')
+        print('Best tour found: %s' % str(tour))
+        print('Cost of the tour: %g' % m.objVal)
+        print('')
+
+        from helper.verification import check_solution
+
+        value = check_solution(arcs, np.array(tour))
+
+        print("Solution valid: " + str(value >= 0) + "\n")
+
+        # get post opt data: solution, value, stopping criterion, runtime,
+        opt_data = [tour, value, m.Runtime, m.status, m.mipgap, m.objbound]
+    else:
+        print("No Solution was found...")
+        if m.status == 9:
+            print("Time Limit was exceeded without solution")
+
+        opt_data = [[], -1, m.Runtime, m.status, m.mipgap, m.objbound]
+
+
 
     print('#################################\n#################################\n')
+
+    return opt_data
 
 
 def get_prec_matrix(arcs):
@@ -228,8 +252,8 @@ if __name__ == "__main__":
     sol_path = "../Data/solutions/"
     sop_path = "../Data/course_benchmark_instances/"
 
-    filter = 'easy'  # easy only (tries to) solve(s) instances < filter_size vertices
-    filter_size = 60
+    filter = 'hard'  # easy only (tries to) solve(s) instances < filter_size vertices
+    filter_size = 100
 
     # get filenames (files where solutions are given)
     sop_files, sol_files = filenames([sol_path, sop_path])
@@ -238,17 +262,27 @@ if __name__ == "__main__":
     instances = []
 
     # fill arrays
-    for i in range(len(sop_files) - 1):
+    #for i in range(len(sop_files)):
+    for i in [2]:
         solution = parser(sol_files[i], True)
         if solution.size > filter_size and filter == 'easy':  # filter out 'big' instances
             continue
         arcs = parser(sop_files[i], True)
-        instances += [(arcs, solution)]
+        instances += [(arcs, solution, sop_files[i])]
 
     for instance in instances:  # for each instance
         for method in solution_methods:  # go through all methods
             if solution_methods[method]:  # and use the specified ones
-                solvers[method](instance[0])  # to solve the problem
+                opt_data = solvers[method](instance[0])  # to solve the problem
+                instance_name = instance[2][:-4].split("/")[3]
+                with open("{}_{}.txt".format(method, instance_name), "w+") as text_file:
+                    text_file.write(
+                        "solution, value, runtime, stopping criterion, mipgap, objbound\n" +
+                        "{}, {}, {}, {}, {}, {}".format(
+                            opt_data[0], opt_data[1], opt_data[2], opt_data[3],
+                            opt_data[4], opt_data[5]
+                        )
+                    )
 
     print("DONE")
 
