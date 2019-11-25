@@ -20,7 +20,7 @@ def subtourelim(model, where):
         # filter the corresponding helper variables
 
 
-        whole_tour = get_whole_tour(selected)
+        #whole_tour = get_whole_tour(selected)
         # find the shortest cycle in the selected edge list
         tour = subtour(selected)
         if len(tour) < n:
@@ -163,6 +163,9 @@ def gurobi_problem(arcs):
 
     m._vars = vars
     m.Params.lazyConstraints = 1
+
+    m.setParam('TimeLimit', 10 * 60)
+
     m.optimize(subtourelim)
 
     vals = m.getAttr('x', vars)
@@ -172,13 +175,16 @@ def gurobi_problem(arcs):
     assert len(tour) == n
 
     print('')
-    print('Optimal tour: %s' % str(tour))
-    print('Optimal cost: %g' % m.objVal)
+    print('Best tour found: %s' % str(tour))
+    print('Cost of the tour: %g' % m.objVal)
     print('')
 
     from helper.verification import check_solution
 
-    print("Solution valid: " + str(check_solution(arcs, np.array(tour))))
+    print("Solution valid: " + str(check_solution(arcs, np.array(tour)) >= 0) + "\n")
+
+    print('#################################\n#################################\n')
+
 
 def get_prec_matrix(arcs):
     """
