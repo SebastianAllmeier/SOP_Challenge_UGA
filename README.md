@@ -1,6 +1,6 @@
 # SOP Challenge UGA SF
 
-SOP Challenge; Sebastian, Felix
+SOP Challenge; Sebastian, Felix, Ionut
 
 **Information**:
 
