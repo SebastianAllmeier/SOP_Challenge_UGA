@@ -10,21 +10,23 @@ if __name__ == "__main__":
     # import methods
     from methods.antColony_method import antColony
     from methods.exact_method import *
-    from methods.greedy_method import greedy
+    from methods.greedy_method import greedy, best_greedy_randomized
     from methods.particleSwarmOpt_method import pso
 
     # specify used methods
     solution_methods = {
         'exact_method': True,
-        'pso': False, # TODO: implement
-        'greedy': False, # TODO: implement
-        'ant_colony': False # TODO: implement
+        'pso': False,  # TODO: implement
+        'greedy': True,
+        'best_greedy_randomized': True,
+        'ant_colony': False  # TODO: implement
     }
 
     solvers = {  # the actual functions for the methods
         'exact_method': plainProblem,
         'pso': pso,
         'greedy': greedy,
+        'best_greedy_randomized': best_greedy_randomized,
         'ant_colony': antColony
     }
 
@@ -42,7 +44,7 @@ if __name__ == "__main__":
     instances = []
 
     # fill arrays
-    for i in range(len(sop_files) - 1):
+    for i in range(len(sop_files)):
         solution = parser(sol_files[i], True)
         if solution.size > filter_size and filter == 'easy':  # filter out 'big' instances
             continue
