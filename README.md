@@ -9,9 +9,17 @@ SOP Challenge; Sebastian, Felix, Ionut
   * to check whether a solution is valid use methods in helper/verification.py;
   * when the verification script is run it checks whether the solution given for the SOP challenge is valid
 
-* regarding the python **MIP Solver**:
+## Exact Method:
+
+* (**old**) regarding the python **MIP Solver**:
   * for an introduction and examples for the mip solver (MIP python package) look into Data/python-mip.pdf
   * especially look at the traveling salesman problem, since the problem is kind of similar to the SOP problem
+  
+* (**new**) now using gurobi with python interface:
+ * using Gurobi 8.1.0 and python 3.7.5 ( both 64 bit versions)
+ 
+  
+ 
 
 **Python Packages**:
 
