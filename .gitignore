@@ -105,3 +105,6 @@ venv.bak/
 
 # PyCharm files
 .idea
+
+# Dataset files
+Data/course_benchmark_instances/
