@@ -16,7 +16,7 @@ SOP Challenge; Sebastian, Felix, Ionut
   * especially look at the traveling salesman problem, since the problem is kind of similar to the SOP problem
   
 * (**new**) now using gurobi with python interface:
- * using Gurobi 8.1.0 and python 3.7.5 ( both 64 bit versions)
+  * using Gurobi 8.1.0 and python 3.7.5 ( both 64 bit versions)
  
   
  
