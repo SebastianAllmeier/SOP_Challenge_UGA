@@ -61,3 +61,34 @@ def best_greedy_randomized(arcs):
             best_cost = cost
 
     return best_path, best_cost
+
+
+if __name__ == "__main__":
+    from helper.parser import parser, filenames
+    import os.path
+
+    # directory paths
+    sol_path = "../Data/solutions/"
+    sop_path = "../Data/course_benchmark_instances/"
+
+    # get filenames (files where solutions are given)
+    sop_files, sol_files = filenames([sol_path, sop_path])
+
+    # fill arrays
+    for sop_file in sop_files:
+        arcs = parser(sop_file, True)
+        instance_name = os.path.basename(sop_file[:-4])
+
+        print('Applying greedy algorithm to', instance_name)
+        path, total_cost = greedy_randomized(arcs)
+
+        print('Path:', path)
+        print('Total cost:', total_cost)
+
+        print('Saving {}.sol'.format(instance_name))
+        with open(r'solutions_greedy_randomized_method\{}.sol'.format(instance_name), 'w') as fp:
+            fp.write(' '.join(map(str, path)) + '\n')
+
+        print()
+
+    print("DONE")
