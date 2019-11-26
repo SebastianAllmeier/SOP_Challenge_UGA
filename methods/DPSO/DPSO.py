@@ -6,6 +6,7 @@ import numpy as np
 import multiprocessing as mp
 from typing import List
 from .operations import op_perm_sub_perm, op_scalar_mul_velocity, op_perm_sum_velocity, op_perm_fix
+from copy import deepcopy
 
 class DPSO:
     def __init__(self,
@@ -71,11 +72,11 @@ class DPSO:
             mapping_results = pool.map(self._create_single_particle, mapping_params)
             for velocity, particle, cost in mapping_results:
                 self.velocities.append(velocity)
-                self.particles.append(particle.copy())
-                self.pbest.append(particle.copy())
+                self.particles.append(deepcopy(particle))
+                self.pbest.append(deepcopy(particle))
                 if self.gbest is None or cost < self.cost(self.gbest):
-                    self.gbest = particle.copy()
-        print('best:', self.gbest, self.cost(self.gbest))
+                    self.gbest = deepcopy(particle)
+        print('initial best:', self.gbest, self.cost(self.gbest))
 
     def _create_single_particle(self, params):
         """
@@ -158,7 +159,9 @@ class DPSO:
         :return:
         """
         if auto_adjust_social_coef:
-            self.coef_social = 1
+            print('WARNING: Auto adjust social coefficient feature is not implemented yet!')
+        # if auto_adjust_social_coef:
+        #     self.coef_social = 1
         if verbose:
             print(f'step {0:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
 
@@ -176,17 +179,24 @@ class DPSO:
                     for index, cost in enumerate(costs):
                         if cost < gbest_cost:
                             gbest_cost = cost
-                            self.gbest = self.particles[index].copy()
+                            self.gbest = deepcopy(self.particles[index])
 
                     if gbest_cost < last_cost:
                         last_cost = gbest_cost
+                    if verbose and it % 10 == 0:
+                        print(f'step {it:4d} / {iterations} file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}')
                         # n = -2
-                        if auto_adjust_social_coef:
-                            n = sum([DPSO.lists_are_equal(particle, self.gbest) for particle in self.particles]) - 1 # !!!
-                            self.coef_social = self.coef_social - 0.01 * n #int(10 * n * U(0.5, 1))
-                            # TO DO: reset particles that are equal to gbest
-                        if verbose:
-                            print(f'step {it:4d}: n = {n:+5d} social = {self.coef_social:5.2f} file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}')
+                        # if False: #auto_adjust_social_coef:
+                        #     n = sum([DPSO.lists_are_equal(particle, self.gbest) for particle in self.particles]) - 1 # !!!
+                        #     self.coef_social = self.coef_social - 0.01 * n # int(10 * n * U(0.5, 1))
+                        #     # TO DO: reset particles that are equal to gbest
+                    # n = 0
+                    # for p in self.particles:
+                    #     if p == self.gbest:
+                    #         n += 1
+                    # print(f'step {it:4d}: n = {n:+5d} social = {self.coef_social:5.2f} file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}')
+                if verbose:
+                    print(f'END file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}')
         else:
             # iterative version updates pbest and gbest as soon as a better particle is obtained (see that the update
             # is made inside "for_i" loop)
@@ -198,14 +208,14 @@ class DPSO:
                     # immediately update global best in case we got a better particle than previous best
                     if cost < gbest_cost:
                         gbest_cost = cost
-                        self.gbest = self.particles[i].copy()
+                        self.gbest = deepcopy(self.particles[i])
                 if verbose:
-                    print(f'step {it:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
+                    print(f'step {it:5d} / : best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
 
     def _optimization_step(self, param):
         particle, velocity, pbest, gbest = param
         # save particle because we will compute velocity at the end
-        old_particle = particle.copy()
+        old_particle = deepcopy(particle)
 
         # apply formula: v(k+1) = [inertia * v(k)] + [personal * rand() * (p(i) - x(i))] + [social * rand() * (g - x(i))]
 
@@ -233,7 +243,9 @@ class DPSO:
 
         # update personal best in case we got a better particle than previous personal best
         if cost < self.cost(pbest):
-            pbest = particle.copy()
+            pbest = deepcopy(particle)
+        if cost < self.cost(self.gbest):
+            self.gbest = deepcopy(particle)
 
         return particle, velocity, pbest, cost
 
