@@ -34,7 +34,7 @@ Find the table of results in the table_of_results.md file within this repository
   * using Gurobi 8.1.0 and python 3.7.5 ( both 64 bit versions)
   * to use gurobi with python the python module 'gurobipy' is required / further information on how to install it see **Python Packages**
   
-### how to use & where to find the .sol files
+### how to use the method & where to find files
 
 * The exact method can be found in methods/exact_method.py
 * To run the exact method run the before mentioned file
