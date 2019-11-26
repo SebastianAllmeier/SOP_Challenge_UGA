@@ -43,7 +43,6 @@ Find the table of results in the table_of_results.md file within this repository
   * The solution folder contains .sol files which have the same formatting as the .sol files given to us in the beginning of the lecture. If no solution was found the file is empty
   * The data files include the solution, the value of the solution, the runtime of the optimizer, the stopping criterion, the gap (calculated by Gurobi abs(Objbound - ObjVal)/abs(ObjVal)) and the lower bound (refered to as objbound)
  
- 
 ------------------------------------------
 
 ## Particle Swarm Method
