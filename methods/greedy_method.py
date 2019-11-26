@@ -2,6 +2,13 @@
 
 
 def greedy(arcs):
+    """
+    Find a feasible solution for the sequential ordering problem
+    defined by the specified matrix using a greedy algorithm.
+
+    :param arcs: Matrix representation of the sequential ordering problem.
+    :return: List of vertices in order of visit for the solution found.
+    """
     total_cost = 0
     visited_vertices = [0]
     big_value = arcs.max() + 1
@@ -21,16 +28,40 @@ def greedy(arcs):
                 next_vertex = i
 
         if next_vertex == -1:
-            raise RuntimeError("Greedy algorithm failed! An implementation with backtracks may be needed.")
+            raise RuntimeError("No feasible solution found for this instance.")
 
         visited_vertices.append(next_vertex)
         total_cost += min_weight
 
-    print('Path:', visited_vertices)
-    print('Total cost: ', total_cost)
-
-    return visited_vertices
+    return visited_vertices, total_cost
 
 
 if __name__ == "__main__":
-    pass  # some tests etc.
+    from helper.parser import parser, filenames
+    import os.path
+
+    # directory paths
+    sol_path = "../Data/solutions/"
+    sop_path = "../Data/course_benchmark_instances/"
+
+    # get filenames (files where solutions are given)
+    sop_files, sol_files = filenames([sol_path, sop_path])
+
+    # fill arrays
+    for sop_file in sop_files:
+        arcs = parser(sop_file, True)
+        instance_name = os.path.basename(sop_file[:-4])
+
+        print('Applying greedy algorithm to', instance_name)
+        path, total_cost = greedy(arcs)
+
+        print('Path:', path)
+        print('Total cost:', total_cost)
+
+        print('Saving {}.sol'.format(instance_name))
+        with open(r'solutions_greedy_method\{}.sol'.format(instance_name), 'w') as fp:
+            fp.write(' '.join(map(str, path)) + '\n')
+
+        print()
+
+    print("DONE")

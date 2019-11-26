@@ -1,0 +1,2 @@
+solution, value, runtime, stopping criterion, mipgap, objbound
+[], -1, 120.02495765686035, 9, 1e+100, 0.0

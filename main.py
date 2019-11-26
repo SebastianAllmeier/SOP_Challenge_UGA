@@ -8,24 +8,23 @@ from helper.parser import parser, filenames
 
 if __name__ == "__main__":
     # import methods
-    from methods.antColony_method import antColony
     from methods.exact_method import *
-    from methods.greedy_method import greedy
+    from methods.greedy_method import greedy, best_greedy_randomized
     from methods.particleSwarmOpt_method import pso
 
     # specify used methods
     solution_methods = {
         'exact_method': True,
-        'pso': False, # TODO: implement
-        'greedy': False, # TODO: implement
-        'ant_colony': False # TODO: implement
+        'pso': False,  # TODO: implement
+        'greedy': True,
+        'best_greedy_randomized': True,
     }
 
     solvers = {  # the actual functions for the methods
-        'exact_method': plainProblem,
+        'exact_method': gurobi_problem,
         'pso': pso,
         'greedy': greedy,
-        'ant_colony': antColony
+        'best_greedy_randomized': best_greedy_randomized,
     }
 
     # directory paths
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     instances = []
 
     # fill arrays
-    for i in range(len(sop_files) - 1):
+    for i in range(len(sop_files)):
         solution = parser(sol_files[i], True)
         if solution.size > filter_size and filter == 'easy':  # filter out 'big' instances
             continue
