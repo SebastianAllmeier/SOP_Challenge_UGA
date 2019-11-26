@@ -14,9 +14,9 @@ if __name__ == "__main__":
 
         # in paper, values for inertia and personal are both equal to 4.5
         # the value for social parameter is automatically adjusted, but I didn't have time to implement it
-        dpso = DPSO(pop_size=70, coef_inertia=4.5, coef_personal=4.5, coef_social=size, particle_size=size, weights_matrix=arcs)
+        dpso = DPSO(pop_size=280, coef_inertia=4.5, coef_personal=4.5, coef_social=size, particle_size=size, weights_matrix=arcs)
         dpso.file_name = f_sop # will be added to constructor in the future
-        dpso.optimize(iterations=1000, verbose=True)
+        dpso.optimize(iterations=5000, verbose=True)
 
         str_cost = str(dpso.cost(dpso.gbest))
         str_particle = ','.join(map(lambda x: str(x), dpso.full_particle(dpso.gbest)))
