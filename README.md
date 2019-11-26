@@ -45,9 +45,9 @@ Find the table of results in the table_of_results.md file within this repository
 
 ### How to use the method & where to find files
 
-* The DPSO method can be found in `methods/particleSwarmOpt_method.py`
+* The DPSO method can be found in `methods/particleSwarmOpt_method.py` on branch first_problem_impl. [Click here to go there](https://github.com/sebs08/SOP_Challenge_UGA/tree/first_problem_impl/methods)
 * The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `particleSwarmOpt_method.py` is run. 
-* The method saves .sol files in the `methods/solutions_dpso` folder and it uses detailed data in the `methods/data_exact_method` folder.
+* The method saves .sol files in the [`methods/solutions_dpso`](https://github.com/sebs08/SOP_Challenge_UGA/tree/first_problem_impl/methods/solutions_dpso) folder and it uses detailed data in the `methods/data_exact_method` folder.
   * The solution folder contains .sol files which contain the following information, one per line:
     * size - the size of the problem
     * file - the name of the file (it's used in the model for verbosing)
