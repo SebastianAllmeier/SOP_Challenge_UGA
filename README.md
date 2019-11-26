@@ -25,3 +25,6 @@ SOP Challenge; Sebastian, Felix, Ionut
 
 * MIP python package (install with: `pip install mip` ) based on coin or
 * numpy (install with: `pip install numpy` )
+
+
+[Table](table_of_results.md)
