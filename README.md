@@ -21,6 +21,7 @@ Find the table of results in the table_of_results.md file within this repository
   * methods in `helper/parser.py` parse .sol and .sop data to numpy arrays
   * to check whether a solution is valid use methods in `helper/verification.py`;
   * when the verification script is run it checks whether the solution given for the SOP challenge is valid
+  
 
 
 ------------------------------------------
@@ -35,9 +36,12 @@ Find the table of results in the table_of_results.md file within this repository
   
 ### how to use & where to find the .sol files
 
-* the exact method can be found in methods/exact_method.py
-* who can it be run?
-* what is the output?
+* The exact method can be found in methods/exact_method.py
+* To run the exact method run the before mentioned file
+* The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `exact_method.py` is run. 
+* The method saves .sol files in the `solutions_exact_method` folder and more detailed data in the `data_exact_method` folder.
+  * The solution folder contains .sol files which have the same formatting the .sol files given to us in the beginning of the lecture; if no solution was found the file is empty
+  * The data files include the solution, the value of the solution, the runtime of the optimizer, the stopping criterion, the gap (calculated by Gurobi) and the lower bound (refered to as objbound)
  
  
 ------------------------------------------
