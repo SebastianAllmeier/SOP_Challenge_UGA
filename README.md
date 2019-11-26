@@ -41,8 +41,19 @@ Find the table of results in the table_of_results.md file within this repository
  
 ------------------------------------------
 
-## Particle Swarm Method
- 
+## Discrete Particle Swarm Method (DPSO)
+
+### How to use the method & where to find files
+
+* The DPSO method can be found in `methods/particleSwarmOpt_method.py`
+* The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `particleSwarmOpt_method.py` is run. 
+* The method saves .sol files in the `methods/solutions_dpso` folder and it uses detailed data in the `methods/data_exact_method` folder.
+  * The solution folder contains .sol files which contain the following information, one per line:
+    * size - the size of the problem
+    * file - the name of the file (it's used in the model for verbosing)
+    * best cost - the cost of the best solution in the swarm
+    * best solution - the solution found so far
+    * elapsed - time elapsed for the computation
 ------------------------------------------
 
 ## Greedy Method
@@ -54,7 +65,6 @@ Find the table of results in the table_of_results.md file within this repository
 * The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `greedy_method.py` is run. 
 * The method saves .sol files in the `methods/solutions_greedy_method` folder.
   * The solution folder contains .sol files which have the same formatting as the .sol files given to us in the beginning of the lecture.
-
 ------------------------------------------
 
 **Python Packages**:
