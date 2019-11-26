@@ -2,29 +2,38 @@
 
 SOP Challenge; Sebastian, Felix, Ionut
 
-**Information**:
+**General Information**:
 
-* regarding the **project files**:
-  * methods in helper/parser.py parse .sol and .sop data to numpy arrays
-  * to check whether a solution is valid use methods in helper/verification.py;
+* TODO: project structure... description
+
+* regarding the **helper** files:
+  * methods in `helper/parser.py` parse .sol and .sop data to numpy arrays
+  * to check whether a solution is valid use methods in `helper/verification.py`;
   * when the verification script is run it checks whether the solution given for the SOP challenge is valid
 
 ## Exact Method:
 
-* (**old**) regarding the python **MIP Solver**:
-  * for an introduction and examples for the mip solver (MIP python package) look into Data/python-mip.pdf
-  * especially look at the traveling salesman problem, since the problem is kind of similar to the SOP problem
-  
-* (**new**) now using gurobi with python interface:
+# preliminaries
+
+* now using gurobi with python interface:
   * using Gurobi 8.1.0 and python 3.7.5 ( both 64 bit versions)
+  * to use gurobi with python the python module 'gurobipy' for further in information on how to install it see **Python Packages**
+  
+# how to use
+
+* the exact method can be found in methods/exact_method.py
+* who can it be run?
+* what is the output?
  
   
  
 
 **Python Packages**:
 
-* MIP python package (install with: `pip install mip` ) based on coin or
-* numpy (install with: `pip install numpy` )
+* Exact method
+
+  * gurobipy - (here with Gurobi 8.1.0) go to the installation directory of gurobi and install with `python setup.py install`
+  * numpy - (install with: `pip install numpy` )
 
 
 [Table](table_of_results.md)
