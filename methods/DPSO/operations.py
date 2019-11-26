@@ -1,5 +1,6 @@
 import math
 import random
+from copy import deepcopy
 from typing import List
 
 def check_permutation(perm : list, lowest : int = 1) -> bool:
@@ -48,7 +49,7 @@ def op_perm_sub_perm(a : list, b : list, allow_checks : bool = False) -> List[tu
         i = a.index(x) # index of element x in a
         if i != j:
             velocity.append((x, i-j))
-    return velocity
+    return deepcopy(velocity)
 
 def op_scalar_mul_velocity(c : float, v : List[tuple]) -> List[tuple]:
     """
@@ -66,11 +67,11 @@ def op_scalar_mul_velocity(c : float, v : List[tuple]) -> List[tuple]:
         size = math.ceil(c * n)
         indexes = random.sample(range(n), size)
         w = [v[i] for i in indexes]
-        return w
+        return deepcopy(w)
     if c > 1:
         w = [(i, random_round(c * d)) for (i, d) in v]
-        return w
-    return v
+        return deepcopy(w)
+    return deepcopy(v)
 
 def op_perm_sum_velocity(x : list, v : List[tuple]) -> list:
     """
@@ -81,13 +82,13 @@ def op_perm_sum_velocity(x : list, v : List[tuple]) -> list:
     :return: y = x + v = permutation x modified by v.
     """
     n = len(x)
-    y = x.copy()
+    y = deepcopy(x)
     for node, disp in v: # disp = displacement
         node_index = y.index(node)
         del y[node_index]
         insert_position = max(0, node_index + disp) if disp < 0 else min(n-1, node_index + disp)
         y.insert(insert_position, node)
-    return y
+    return deepcopy(y)
 
 def op_perm_fix(x : list, P : List[tuple]) -> list:
     """
@@ -97,13 +98,14 @@ def op_perm_fix(x : list, P : List[tuple]) -> list:
     :param P: the precedence constraints: R = {(i,j) meaning that i must precede j in permutation}.
     :return: y = the permutation obtained from x that respects now precedence constraints R.
     """
+    # print('fixing', x, 'with precedences', P)
     n = len(x)
-    y = x.copy()
+    y = deepcopy(x)
     k = n - 1
     while 1 <= k:
         j = y[k]
         f = 0
-        for h in range(n): # the paper goes from 1 to n-1 (if there are problems, recheck!)
+        for h in range(n-1): # the paper goes from 1 to n-1 (if there are problems, recheck!)
             i = y[h]
             if (i, j) in P and h > f:
                 f = h
@@ -113,4 +115,5 @@ def op_perm_fix(x : list, P : List[tuple]) -> list:
              del y[k]
              y.insert(f, j)
              k = f - 2
-    return y
+    # print('fixed', y)
+    return deepcopy(y[1:-1]) # get rid of first and last nodes (may give up this implementation)
