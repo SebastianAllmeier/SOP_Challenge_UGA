@@ -4,7 +4,7 @@ from methods.DPSO.DPSO import DPSO
 from helper.parser import parser, filenames
 
 if __name__ == "__main__":
-    files_sop, files_sol = filenames(('../Data/solutions/', '../Data/course_benchmark_instances/'))
+    files_sop, files_sol = filenames(('./solutions_dpso/', '../Data/course_benchmark_instances/'))
     for f_sop, f_sol in zip(files_sop, files_sol):
         start_time = datetime.now()
         print('started at', start_time)
