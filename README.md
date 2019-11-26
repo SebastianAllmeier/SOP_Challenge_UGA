@@ -1,6 +1,11 @@
 # SOP Challenge UGA SF
 
-SOP Challenge; Sebastian, Felix, Ionut
+SOP Challenge; 
+
+Autors: Sebastian, Felix, Ionut
+
+Table of results: [link](table_of_results.md)
+
 
 **General Information**:
 
@@ -13,13 +18,13 @@ SOP Challenge; Sebastian, Felix, Ionut
 
 ## Exact Method:
 
-# preliminaries
+### preliminaries
 
 * now using gurobi with python interface:
   * using Gurobi 8.1.0 and python 3.7.5 ( both 64 bit versions)
   * to use gurobi with python the python module 'gurobipy' for further in information on how to install it see **Python Packages**
   
-# how to use
+### how to use
 
 * the exact method can be found in methods/exact_method.py
 * who can it be run?
@@ -36,4 +41,3 @@ SOP Challenge; Sebastian, Felix, Ionut
   * numpy - (install with: `pip install numpy` )
 
 
-[Table](table_of_results.md)
