@@ -156,14 +156,16 @@ def gurobi_problem(arcs):
     # set up final model properties
     m._vars = vars
 
-    # use lazy constraints
-    m.Params.lazyConstraints = 1
+    m.setObjective(quicksum(vars[i,j]*cost_matrix[i,j] for i in range(n) for j in range(n)), sense=GRB.MINIMIZE)
 
-    # set time limit
-    m.setParam('TimeLimit', 20 * 60)
+    # use lazy constraints
+    m.Params.lazyConstraints = 0
+
+    # set time limit (2 minutes)
+    m.setParam('TimeLimit', 2 * 60)
 
     #optimize
-    m.optimize(subtourelim)
+    m.optimize()# subtourelim)
 
 
     # console output and saving results with respect to opt. outcomes
@@ -235,9 +237,6 @@ if __name__ == "__main__":
     # specify used methods
     solution_methods = {
         'exact_method': True,
-        'pso': False, # TODO: implement
-        'greedy': False, # TODO: implement
-        'ant_colony': False # TODO: implement
     }
 
     solvers = {  # the actual functions for the methods
@@ -258,26 +257,35 @@ if __name__ == "__main__":
     instances = []
 
     # fill arrays
-    #for i in range(len(sop_files)):
-    for i in [2]:
-        solution = parser(sol_files[i], True)
-        if solution.size > filter_size and filter == 'easy':  # filter out 'big' instances
-            continue
+    for i in range(len(sop_files)):
+    #for i in [2]:
+        # solution = parser(sol_files[i], True)
         arcs = parser(sop_files[i], True)
-        instances += [(arcs, solution, sop_files[i])]
+
+        if arcs.shape[0] > filter_size and filter == 'easy':  # filter out 'big' instances
+            continue
+        instances += [(arcs, sop_files[i])]
 
     for instance in instances:  # for each instance
         for method in solution_methods:  # go through all methods
             if solution_methods[method]:  # and use the specified ones
                 opt_data = solvers[method](instance[0])  # to solve the problem
-                instance_name = instance[2][:-4].split("/")[3]
-                with open("{}_{}.txt".format(method, instance_name), "w+") as text_file:
+                instance_name = instance[1][:-4].split("/")[3]
+                with open("data_exact_method/{}_{}.txt".format(method, instance_name), "w+") as text_file:
                     text_file.write(
                         "solution, value, runtime, stopping criterion, mipgap, objbound\n" +
                         "{}, {}, {}, {}, {}, {}".format(
                             opt_data[0], opt_data[1], opt_data[2], opt_data[3],
                             opt_data[4], opt_data[5]
                         )
+                    )
+                # save found solution in .sol file
+                with open("solutions_exact_method/{}.sol".format(instance_name), "w+") as sol_file:
+                    solution_str = ""
+                    for entry in opt_data[0]:
+                        solution_str += "{} ".format(entry)
+                    sol_file.write(
+                        solution_str
                     )
 
     print("DONE")

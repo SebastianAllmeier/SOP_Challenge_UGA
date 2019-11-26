@@ -8,7 +8,6 @@ from helper.parser import parser, filenames
 
 if __name__ == "__main__":
     # import methods
-    from methods.antColony_method import antColony
     from methods.exact_method import *
     from methods.greedy_method import greedy, best_greedy_randomized
     from methods.particleSwarmOpt_method import pso
@@ -19,15 +18,13 @@ if __name__ == "__main__":
         'pso': False,  # TODO: implement
         'greedy': True,
         'best_greedy_randomized': True,
-        'ant_colony': False  # TODO: implement
     }
 
     solvers = {  # the actual functions for the methods
-        'exact_method': plainProblem,
+        'exact_method': gurobi_problem,
         'pso': pso,
         'greedy': greedy,
         'best_greedy_randomized': best_greedy_randomized,
-        'ant_colony': antColony
     }
 
     # directory paths
