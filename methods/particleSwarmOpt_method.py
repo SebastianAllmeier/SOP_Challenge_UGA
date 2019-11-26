@@ -1,45 +1,37 @@
-import numpy as np
 import os
+from datetime import datetime
 from methods.DPSO.DPSO import DPSO
-from helper.parser import parser
-
-# SEED = 666
-# np.random.seed(SEED)
-# random.seed(SEED)
-
-# def check_if_start_and_end_nodes_are_always_first_and_last():
-#     base_path = '../Data/course_benchmark_instances/'
-#     for file in os.listdir(base_path):
-#         full_path = os.path.join(base_path, file)
-#         arcs = parser(full_path, False)
-#         particle_size = len(arcs)
-#         M = -np.inf
-#         node_start, node_end = -1, -1
-#         for i in range(particle_size):
-#             for j in range(particle_size):
-#                 if arcs[i][j] > M:
-#                     M = arcs[i][j]
-#                     node_start, node_end = i, j
-#         print(file, particle_size, node_start, node_end, 'FIRST=LAST' if node_end == particle_size-1 else 'DIFFERENT')
-# check_if_start_and_end_nodes_are_always_first_and_last()
+from helper.parser import parser, filenames
 
 if __name__ == "__main__":
-    # file_name = 'ex'
-    # file_name = 'ESC07'
-    file_name = 'ESC63'
-    # file_name = 'ESC78'
-    # file_name = 'R.700.1000.15'
-    # file_name = 'ry48p.2'
-    # file_name = 'ry48p.3'
-    # file_name = 'br17.10'
+    files_sop, files_sol = filenames(('../Data/solutions/', '../Data/course_benchmark_instances/'))
+    for f_sop, f_sol in zip(files_sop, files_sol):
+        start_time = datetime.now()
+        print('started at', start_time)
 
-    arcs = parser(f'../Data/course_benchmark_instances/{file_name}.sop', True)
-    dpso = DPSO(pop_size=30, coef_inertia=4.5, coef_personal=4.5, coef_social=8, particle_size=len(arcs), weights_matrix=arcs)
-    dpso.file_name = file_name
-    dpso.optimize(iterations=1000, parallelize=True, verbose=True, auto_adjust_social_coef=True)
+        arcs = parser(f_sop, True)
+        size = len(arcs)
 
-    # print('start', dpso.node_start)
-    # print('end', dpso.node_end)
-    # print('precedences', dpso.precedences)
-    # for i, particle in enumerate(dpso.particles):
-    #     print('particle', i, dpso.full_particle(particle), 'cost', dpso.cost(particle))
+        # in paper, values for inertia and personal are both equal to 4.5
+        # the value for social parameter is automatically adjusted, but I didn't have time to implement it
+        dpso = DPSO(pop_size=70, coef_inertia=4.5, coef_personal=4.5, coef_social=size, particle_size=size, weights_matrix=arcs)
+        dpso.file_name = f_sop # will be added to constructor in the future
+        dpso.optimize(iterations=1000, verbose=True)
+
+        str_cost = str(dpso.cost(dpso.gbest))
+        str_particle = ','.join(map(lambda x: str(x), dpso.full_particle(dpso.gbest)))
+
+        print('best cost', str_cost)
+        print('best solution', str_particle)
+
+        end_time = datetime.now()
+
+        with open(f_sol, 'w') as w:
+            w.write(f'size: {size}\n')
+            w.write(f'file: {os.path.basename(f_sop)}\n')
+            w.write(f'best cost: {str_cost}\n')
+            w.write(f'best solution: [{str_particle}]\n')
+            w.write(f'elapsed: {end_time - start_time}\n')
+
+        print('ended at', end_time)
+        print('elapsed', (end_time - start_time))
