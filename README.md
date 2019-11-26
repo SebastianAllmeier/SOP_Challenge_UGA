@@ -7,8 +7,11 @@ This README provides all necessary information to obtain results from our soluti
 
 Find the table of results in the table_of_results.md file within this repository or klick on the link below.
 
+------------------------------------------
+
 **Table of results**: [link](table_of_results.md)
 
+------------------------------------------
 
 **General Information**:
 
@@ -19,7 +22,10 @@ Find the table of results in the table_of_results.md file within this repository
   * to check whether a solution is valid use methods in `helper/verification.py`;
   * when the verification script is run it checks whether the solution given for the SOP challenge is valid
 
-## Exact Method:
+
+------------------------------------------
+
+## Exact Method
 
 ### preliminaries
 
@@ -33,8 +39,16 @@ Find the table of results in the table_of_results.md file within this repository
 * who can it be run?
 * what is the output?
  
-  
  
+------------------------------------------
+
+## Particle Swarm Method
+ 
+------------------------------------------
+
+## Greedy Method
+
+------------------------------------------
 
 **Python Packages**:
 
