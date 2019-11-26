@@ -1,10 +1,13 @@
-# SOP Challenge UGA SF
+# Sequential Ordering Problem challenge
 
-SOP Challenge; 
 
-Autors: Sebastian, Felix, Ionut
+**Autors**: Sebastian, Felix, Ionut
 
-Table of results: [link](table_of_results.md)
+This README provides all necessary information to obtain results from our solution methods (Exact Method, Greedy Method, Particle Swarm Method). Within the respective sections all requirements to use the methods (such as used solvers) and an instruction on how to run the methods is given. 
+
+Find the table of results in the table_of_results.md file within this repository or klick on the link below.
+
+**Table of results**: [link](table_of_results.md)
 
 
 **General Information**:
