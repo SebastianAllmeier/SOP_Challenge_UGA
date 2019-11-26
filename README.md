@@ -20,8 +20,6 @@ Find the table of results in the table_of_results.md file within this repository
   * to check whether a solution is valid use methods in `helper/verification.py`;
   * when the verification script is run it checks whether the solution given for the SOP challenge is valid
   
-
-
 ------------------------------------------
 
 ## Exact Method
@@ -53,7 +51,7 @@ Find the table of results in the table_of_results.md file within this repository
 
 * The greedy method can be found in `methods/greedy_method.py`.
 * To run the greedy method run the forementioned file.
-* The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `exact_method.py` is run. 
+* The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `greedy_method.py` is run. 
 * The method saves .sol files in the `methods/solutions_greedy_method` folder.
   * The solution folder contains .sol files which have the same formatting as the .sol files given to us in the beginning of the lecture.
 
