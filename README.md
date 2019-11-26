@@ -15,8 +15,6 @@ Find the table of results in the table_of_results.md file within this repository
 
 **General Information**:
 
-* TODO: project structure... description
-
 * regarding the **helper** files:
   * methods in `helper/parser.py` parse .sol and .sop data to numpy arrays
   * to check whether a solution is valid use methods in `helper/verification.py`;
