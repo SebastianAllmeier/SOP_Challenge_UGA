@@ -3,7 +3,7 @@
 
 **Autors**: Sebastian, Felix, Ionut
 
-This README provides all necessary information to obtain results from our solution methods (Exact Method, Greedy Method, Particle Swarm Method). Within the respective sections all requirements to use the methods (such as used solvers) and an instruction on how to run the methods is given. 
+This README provides all necessary information to obtain results from our solution methods (Exact Method, Greedy Method, Particle Swarm Method). Within the respective sections all requirements to use the methods (such as used solvers) and an instruction on how to run the methods is given. Solutions for the methods can be retrieved in the their respective .sol files. The location of these files is given within the decription of the methods.
 
 Find the table of results in the table_of_results.md file within this repository or klick on the link below.
 
@@ -27,13 +27,13 @@ Find the table of results in the table_of_results.md file within this repository
 
 ## Exact Method
 
-### preliminaries
+### requirements
 
-* now using gurobi with python interface:
+* using gurobi with python interface:
   * using Gurobi 8.1.0 and python 3.7.5 ( both 64 bit versions)
-  * to use gurobi with python the python module 'gurobipy' for further in information on how to install it see **Python Packages**
+  * to use gurobi with python the python module 'gurobipy' is required / further information on how to install it see **Python Packages**
   
-### how to use
+### how to use & where to find the .sol files
 
 * the exact method can be found in methods/exact_method.py
 * who can it be run?
