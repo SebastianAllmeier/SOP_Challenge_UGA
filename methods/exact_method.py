@@ -1,61 +1,209 @@
 # exact method for the sop problem
 
-from mip.model import *  # coin Or python solver
-from mip.callbacks import ConstrsGenerator, CutPool
+from gurobipy import *
 import numpy as np
-from sys import stdout as out
-from itertools import product
-import networkx as nx
+
+n = 0
+prec_matrix = None
+cost_matrix = None
+
+def subtourelim(model, where):
+    if where == GRB.Callback.MIPSOL:
+        # make a list of edges selected in the solution
+        vals = model.cbGetSolution(model._vars)
+        # only takes selected vars
+        selected = tuplelist((i,j) for i,j in model._vars.keys() if vals[i,j] > 0.5)
+        # filter the corresponding helper variables
 
 
-class SubTourCutGenerator(ConstrsGenerator):
-    def __init__(self, prec_constraints_matrix, z):
-        self.prec = prec_constraints_matrix
-        self.z = z
+        #whole_tour = get_whole_tour(selected)
+        # find the shortest cycle in the selected edge list
+        tour = subtour(selected)
+        if len(tour) < n:
+            # add subtour elimination constraint for every pair of cities in tour
+            for perm in itertools.permutations(tour):
+                model.cbLazy(quicksum(model._vars[perm[i], perm[(i+1) % len(perm)]]
+                                      for i in range(len(perm)))
+                             <= len(perm)-1)
 
-    #def __init__(self, Fl: List[Tuple[int, int]]):
-    #    self.F = Fl
+            model.cbLazy(quicksum(model._vars[i, j]
+                                  for i, j in itertools.combinations(tour, 2))
+                         <= len(tour)-1)
+        """
+        corresp_helper = []
+        for var in model._Model__vars:
+            if var.VarName[0] == 'h':
+                i = int(var.VarName.split('(')[1].split(',')[0])
+                j = int(var.VarName.split(')')[0].split(',')[1])
+                corresp_helper += [(var, (i, j))]
 
-    def generate_constrs(self, model: Model):
-        V = range(self.prec.shape[0])
-        n = self.prec.shape[0]
-        cp = CutPool()
-        r = []
-        s = []
+        for index_1, i in enumerate(whole_tour):
+            for index_2, j in enumerate(whole_tour[index_1:]):
+                if prec_matrix[i, j]:
+                    for helper in corresp_helper:
+                        if helper[1] == (i,j):
+                            helper_i_j = helper[0]
+                        elif helper[1] == (j,i):
+                            helper_j_i =  helper[0]
+                    model.cbLazy(helper_i_j - helper_j_i >= 0)
+                    #m.addConstr(helper(j, i) - helper(i, j) >= 0)
+        """
 
-        valid = True # implement checker / add checker
-        for v in model.vars:
-            if v.name.startswith('x') and v.x > 0:
-                i = int(v.name.split('(')[1].split(',')[0])
-                j = int(v.name.split(')')[0].split(',')[1])
-                r += [(v,(i, j))]  # add  current path
 
-        if not valid:
+def get_whole_tour(edges):
+    unvisited = list(range(n))
+    cycle = []  # initial length has 1 more city
+    while unvisited:  # true if list is non-empty
+        thiscycle = []
+        neighbors = unvisited
+        while neighbors:
+            current = neighbors[0]
+            thiscycle.append(current)
+            unvisited.remove(current)
+            neighbors = [j for i, j in edges.select(current, '*') if j in unvisited]
+        cycle += thiscycle
+    return cycle
 
-            for (v, (i,j)) in r:
-                cut = xsum(self.z[i,l] for (k,l) in r) - xsum(self.z[l,i] for (k,l) in r) == -1
-                cp.add(cut)
 
-            #for i in set(V) - {0}:  # for every visited node leave one package (out one less than in)
-            #    model += (xsum(z[i][j] for j in V) - xsum(z[j][i] for j in V)) == -1
 
-            for (v, (i,j)) in r:  # only variables which are included in the path can be greater 0
-                cut = self.z[i][j] <= (n - 1)*v.x
-                cp.add(cut)
 
-            for (v, (i,j)) in r:  # if j must precede i, more packages must reach j than i (visit j before i)
-                if self.prec[i][j]:
-                    cut = xsum(self.z[k][j] for (v, (k,l)) in r) >= xsum(self.z[k][i] for (v, (k,l)) in r)
-                    cp.add(cut)
+def subtour(edges):
+    unvisited = list(range(n))
+    cycle = range(n+1) # initial length has 1 more city
+    while unvisited: # true if list is non-empty
+        thiscycle = []
+        neighbors = unvisited
+        while neighbors:
+            current = neighbors[0]
+            thiscycle.append(current)
+            unvisited.remove(current)
+            neighbors = [j for i,j in edges.select(current,'*') if j in unvisited]
+        if len(cycle) > len(thiscycle):
+            cycle = thiscycle
+    return cycle
 
-                    if len(cp.cuts) > 256:
-                        for cut in cp.cuts:
-                            model += cut
-                        return
 
-        for cut in cp.cuts:
-            model += cut
-        return
+def gurobi_problem(arcs):
+
+    ## initialization
+    # create model
+    m = Model()
+
+    # separate cost and precedence matrix
+    # make global for subtourelim
+    global cost_matrix
+    global prec_matrix
+
+
+    cost_matrix = get_cost_matrix(arcs)
+    prec_matrix = get_prec_matrix(arcs)
+
+
+
+    # size of the problem
+
+    global n
+    n = prec_matrix.shape[0]
+
+    prec_matrix[n-1, 0] = 0
+
+
+    # add decision variables to the model
+    vars = tupledict()
+    for i in range(n):
+        for j in range(n):
+            vars[i, j] = m.addVar(name='var({},{})'.format(i,j), vtype=GRB.BINARY, obj=cost_matrix[i,j])
+
+    helper = tupledict()
+    for i in range(n):
+        for j in range(n):
+            helper[i,j] = m.addVar(name='helper({},{})'.format(i,j), vtype=GRB.INTEGER)
+
+
+    ## add constraints
+    # sub tour and precedence constraints will be added as lazy constraints
+
+    # can only leave every node once
+    # but never leave the last node
+    m.addConstrs(vars.sum(i, '*') == 1 for i in range(n))
+
+    # artificially add connection between last and first node
+    m.addConstr(vars[n-1,0] == 1)
+
+    # have to enter every node exactly once ( except first node 0)
+    m.addConstrs(vars.sum('*', j) == 1 for j in range(n))
+
+    m.addConstrs(vars[i,i] == 0 for i in range(n))
+
+    ###########
+    # prec constraints
+
+    m.addConstr(helper.sum(0, '*') == n-1) # have n-1 packages leaving from 0
+
+    for i in range(n):
+        for j in range(n): # only variables which are included in the path can be greater 0
+            m.addConstr(helper[i,j] <= (n-1) * vars[i,j])
+
+    # for every visited node leave one package (out one less than in)
+    m.addConstrs(helper.sum(i, '*') - helper.sum('*', i) == -1 for i in range(1,n))
+
+    for i in range(1,n):
+        for j in range(1,n):
+            if prec_matrix[i,j]:
+                m.addConstr(helper.sum('*', j) - helper.sum('*', i) >= 0)
+
+
+    # set up final model properties
+    m._vars = vars
+
+    # use lazy constraints
+    m.Params.lazyConstraints = 1
+
+    # set time limit
+    m.setParam('TimeLimit', 20 * 60)
+
+    #optimize
+    m.optimize(subtourelim)
+
+
+    # console output and saving results with respect to opt. outcomes
+    if m.SolCount > 0:
+        vals = m.getAttr('x', vars)
+        selected = tuplelist((i, j) for i, j in vals.keys() if vals[i, j] > 0.5)
+
+        tour = subtour(selected)
+        assert len(tour) == n
+
+        if m.status == 2:
+            print("Optimal Solution was found.")
+        if m.status == 9:
+            print("Time limit was exceeded.")
+
+        print('')
+        print('Best tour found:  %s' % str(tour))
+        print('Cost of the tour: %g' % m.objVal)
+        print('')
+
+        from helper.verification import check_solution
+
+        value = check_solution(arcs, np.array(tour))
+
+        print("Solution valid: " + str(value >= 0) + "\n")
+
+        # get post opt data: solution, value, stopping criterion, runtime,
+        opt_data = [tour, value, m.Runtime, m.status, m.mipgap, m.objbound]
+    else:
+        print("No Solution was found...")
+        if m.status == 9:
+            print("Time Limit was exceeded without solution")
+
+        opt_data = [[], -1, m.Runtime, m.status, m.mipgap, m.objbound]
+
+
+
+    print('#################################\n#################################\n')
+
+    return opt_data
 
 
 def get_prec_matrix(arcs):
@@ -81,137 +229,56 @@ def get_cost_matrix(arcs):
 
     return np.multiply(arcs, arcs != -1).astype(int)
 
+if __name__ == "__main__":
+    from helper.parser import parser, filenames
 
-def add_variables(model, n=0):
-    """
-    Add the required amount of variables to the problem.
+    # specify used methods
+    solution_methods = {
+        'exact_method': True,
+        'pso': False, # TODO: implement
+        'greedy': False, # TODO: implement
+        'ant_colony': False # TODO: implement
+    }
 
-    :param model:
-    :param n: (square root of) numbers of variables (will get squared)
-    :return: model with added decision variables
-    """
-    v = range(n)
+    solvers = {  # the actual functions for the methods
+        'exact_method': gurobi_problem,
+    }
 
-    # add one descision variable for each connection i,j of nodes indicating whether
-    # route from i to j was taken
-    return [[model.add_var(var_type=BINARY) for j in v] for i in v]
+    # directory paths
+    sol_path = "../Data/solutions/"
+    sop_path = "../Data/course_benchmark_instances/"
 
+    filter = 'hard'  # easy only (tries to) solve(s) instances < filter_size vertices
+    filter_size = 100
 
-def add_constraints(model, x, z, prec_matrix):
-    """
-    Add necessary constraints to the model.
+    # get filenames (files where solutions are given)
+    sop_files, sol_files = filenames([sol_path, sop_path])
 
-    :param model:
-    :param prec_matrix:
-    :return:
-    """
+    # initialize array arcs and solutions
+    instances = []
 
-    V = range(prec_matrix.shape[0])
-    n =  prec_matrix.shape[0]
+    # fill arrays
+    #for i in range(len(sop_files)):
+    for i in [2]:
+        solution = parser(sol_files[i], True)
+        if solution.size > filter_size and filter == 'easy':  # filter out 'big' instances
+            continue
+        arcs = parser(sop_files[i], True)
+        instances += [(arcs, solution, sop_files[i])]
 
-    # we will never move away from the last node
-    # we can only leave every node once
-    for i in range(prec_matrix.shape[0]-1):
-        model += xsum(x[i][j] for j in V) == 1
+    for instance in instances:  # for each instance
+        for method in solution_methods:  # go through all methods
+            if solution_methods[method]:  # and use the specified ones
+                opt_data = solvers[method](instance[0])  # to solve the problem
+                instance_name = instance[2][:-4].split("/")[3]
+                with open("{}_{}.txt".format(method, instance_name), "w+") as text_file:
+                    text_file.write(
+                        "solution, value, runtime, stopping criterion, mipgap, objbound\n" +
+                        "{}, {}, {}, {}, {}, {}".format(
+                            opt_data[0], opt_data[1], opt_data[2], opt_data[3],
+                            opt_data[4], opt_data[5]
+                        )
+                    )
 
-    model += xsum(x[i][j] for j in V for i in V) == prec_matrix.shape[0]-1
+    print("DONE")
 
-    # we can only enter every node once
-    # we never enter node 0 (sine we always start there
-    for j in range(1, prec_matrix.shape[0]):
-        model += xsum(x[i][j] for i in V) == 1
-
-    for i in V:
-        model += x[i][i] == 0
-
-    # add precedence constraints
-    # for each vertex, we can only reach it if all precedence constraints are satisfied
-    # for each node look at incoming connections and make sure that there is no precedence constraints
-    # on the connection
-    # for j in V:
-    #    model += xsum(x[i][j]*prec_matrix[i, j] for i in V) == 0
-
-    model += xsum(z[0][j] for j in V) == n-1  # have n-1 packages leaving from 0
-    # keep this constraint ( 1 constraint )
-
-    for i in set(V) - {0}:  # for every visited node leave one package (out one less than in)
-        model += ( xsum(z[i][j] for j in V) - xsum(z[j][i] for j in V) ) == -1
-    # keep this contraint ( n constraints )
-
-    for i in V:  # only variables which are included in the path can be greater 0
-        for j in V:
-            model += z[i][j] <= (n-1)*x[i][j]
-    # keep constraint
-
-    for i in set(V) - {0}:  # if j must precede i, more packages must reach j than i (visit j before i)
-        for j in set(V) - {0}:
-            if prec_matrix[i][j]:
-                model += xsum(z[l][j] for l in V) >= xsum(z[k][i] for k in V)
-
-
-def plainProblem(arcs):
-    """
-    Generate a model for the plain problem
-
-    :param arcs: matrix of arcs which includes precedence constrains and costs
-    :return: model of the plain problem without any simplifications
-    """
-
-    # separate cost and precedence matrix
-    cost_matrix = get_cost_matrix(arcs)
-    prec_matrix = get_prec_matrix(arcs)
-
-    # initialize model (MIP coin OR solver)
-    model = Model()  # initialize model from mip solver
-
-    # get number of vertices
-    n = cost_matrix.shape[0]
-
-    # add decision variables
-    # add one decision variable for each connection i,j of nodes indicating whether
-    # route from i to j was taken
-    v = range(n)
-    x = [[model.add_var(var_type=BINARY, name='x({},{})'.format(i, j)) for j in v] for i in v]
-    # add variables for sub-tour elimination
-    # y = [model.add_var() for i in v]
-    z = [[model.add_var(var_type=INTEGER, name='z({},{})'.format(i, j)) for j in v] for i in v]
-
-
-    # add objective
-    model.objective = minimize(xsum(cost_matrix[i, j]*x[i][j] for i in range(n) for j in range(n)))
-
-    add_constraints(model, x, z, prec_matrix)
-
-    print("Solving...")
-
-    model.optimize(max_seconds = 1000)
-
-    if model.num_solutions:
-        out.write('Path with total cost {} was found.'.format(model.objective_value))
-        path = [0]
-        print()
-        """
-        if False: # to print out the decision variables and their connection
-            for i in range(n):
-                for j in range(n):
-                    out.write("{} ".format(x[i][j].x))
-                    if x[i][j].x >= 0.99:
-                        a, b = i, j
-                out.write(" from {} to {}".format(a, b))
-                print()
-        """
-        while path[-1] != cost_matrix.shape[0]-1:
-            path += [j for j in range(n) if x[path[-1]][j].x >= 0.99]
-
-        out.write("-----------------\n\n")
-        out.write("The path takes the following route: \n")
-        for i, vertex in enumerate(path):
-            if ((i) % 10) == 0:
-                out.write('\n')
-            if vertex != cost_matrix.shape[0]-1:
-                out.write('{}\t -> '.format(vertex))
-            else:
-                out.write('{}'.format(vertex))
-        out.write(';\n\nLength of the path: {}\n\n'.format(len(path)))
-        out.write('-----------------\n\n')
-    #print("Done; value: {}".format(model.objective_value))
