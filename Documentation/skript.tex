@@ -17,7 +17,7 @@
   		\item \TODO{Add references}
     \end{itemize}
 
-    \section{Introduction}
+    \section{SOP Problem}
 
     
 
@@ -29,7 +29,9 @@
 
     \subsubsection{Greedy Method}
 
-    \TODO{Add description}
+   	The first, simple heuristic we implemented was a greedy algorithm for the SOP Problem. The Greedy algorithm builds a solution starting from the initial node by choosing the the next best node in terms of cost and precedence constraints. As should be known the greedy algorithm makes local optimal decision which not always lead global optimal solutions. Furthermore the greedy algorithm was able to find feasible solutions for all instances quite fast and is easily implemented due to the local search criteria. \cite{Cormen2009} \\
+
+   	In the case of the SOP Problem the greedy algorithm starts the generation of the Hamiltonian path at the initial node. At each iteration of the algorithm we compute the set of unvisited nodes which do not violate the precedence constraints given by the instance. We then append the node with the lowest cost (greedy selection) for this set to the current path. This procedure repeats until all nodes have been visited and the final node has been reached.
 
     \subsubsection{GRASP Method}
 
@@ -39,15 +41,92 @@
 
     \TODO{Add description}
 
-
-
-
     \subsection{Results}
     \label{results}
 
-    \TODO{make tables align with text}
+    The subsequent tables contain results for the used methods. The first table (\ref{table:results_cost}) displays the costs of the found solutions the second table (\ref{table:results_time}) the time needed to compute the solutions. 
 
-    \import{files/}{result_tables.tex}
+    \begin{table}[htb]
+		\rowcolors{2}{gray!25}{white}
+		\begin{tabular}{lcccc}
+			Instance & LB & UB & Greedy Algorithm & Beam Search \\
+			ESC07 & 2.125 & 2.125 & 2.700 & \\
+			ESC11 & 2.075 & 2.075 & 3.175 & \\
+			ESC12 & 1.675 & 1.675 & 2.034 & \\
+			ESC25 & 1.681 & 1.681 & 3.360 & \\
+			ESC47 & 1.288 & 1.288 & 3.843 & \\
+			ESC63 & 62	  & 62    & 76 & \\
+			ESC78 & 18.230 & 18.230 & 22.600 & \\
+			kro124p.1 & 38.762 & 39.420 & 52.575 & \\
+			kro124p.2 & 39.841 & 41.336 & 57.723 & \\
+			kro124p.3 & 43.904 & 49.499 & 77.266 & \\
+			kro124p.4 & 73.021 & 76.103 & 98.427 & \\
+			ry48p.1   & 15.805 & 15.805 & 22.493 & \\
+			ry48p.2   & 16.074 & 16.666 & 20.911 & \\
+			ry48p.3   & 19.490 & 19.894 & 27.342 & \\
+			ry48p.4   & 31.446 & 31.446 & 41.176 & \\
+			R.500.1000.1  & 1.316   & 1.316 & 6.205 & \\
+			R.500.1000.15 & 43.134  & 49.504 & 111.129 & \\
+			R.500.1000.30 & 98.987  & 98.987 & 155.387 & \\
+			R.500.1000.60 & 178.212 & 178.212 & 205.604 & \\
+			R.600.1000.1  & 1.337   & 1.337 & 4.931 & \\
+			R.600.1000.15 & 47.042  & 55.213 & 120.975 & \\
+			R.600.1000.30 & 126.789 & 126.789 & 189.988 & \\
+			R.600.1000.60 & 214.608 & 214.608 & 256.253 & \\
+			R.700.1000.1  & 1.231   & 1.231 & 4.886 & \\
+			R.700.1000.15 & 54.351  & 65.305 & 151.331 & \\
+			R.700.1000.30 & 134.474 & 134.474 & 208.460 & \\
+			R.700.1000.60 & 245.589 & 245.589 & 277.504 & \\
+		\end{tabular}
+		\caption{Results - Cost}
+		\label{table:results_cost}
+	\end{table}
+
+	\begin{table}[htb]
+		\rowcolors{2}{gray!25}{white}
+		\begin{tabular}{lcc}
+			Instance & Greedy Algorithm (in s) & Beam Search (in s) \\
+			ESC07 & 0.000 & \\
+			ESC11 & 0.001 & \\
+			ESC12 & 0.001 & \\
+			ESC25 & 0.004 & \\
+			ESC47 & 0.015 & \\
+			ESC63 & 0.026 & \\
+			ESC78 & 0.036 & \\
+			kro124p.1 & 0.062 & \\
+			kro124p.2 & 0.080 & \\
+			kro124p.3 & 0.077 & \\
+			kro124p.4 & 0.076 & \\
+			ry48p.1   & 0.016 & \\
+			ry48p.2   & 0.020 & \\
+			ry48p.3   & 0.018 & \\
+			ry48p.4   & 0.015 & \\
+			R.500.1000.1  & 2.617 & \\
+			R.500.1000.15 & 25.288 & \\
+			R.500.1000.30 & 25.989 & \\
+			R.500.1000.60 & 26.161 & \\
+			R.600.1000.1  & 4.022 & \\
+			R.600.1000.15 & 44.231 & \\
+			R.600.1000.30 & 43.502 & \\
+			R.600.1000.60 & 43.993 & \\
+			R.700.1000.1  & 5.865 & \\
+			R.700.1000.15 & 68.580 & \\
+			R.700.1000.30 & 69.449 & \\
+			R.700.1000.60 & 69.626 & \\
+		\end{tabular}
+		\caption{Results - Computation Time}
+		\label{table:results_time}
+	\end{table}
+
+
+
+
+
+	% references
+    \newpage
+
+	\bibliography{references} 
+	\bibliographystyle{ieeetr}
 
 
 
