@@ -39,6 +39,10 @@
 
     \subsubsection{Beam Search Method}
 
+    The beam search heuristic is build a search tree by using breath-first search. At every level of the tree it generates all children of the current tree. Subsequently all paths besides the K best ones, with respect to the cost of the path, are trimmed. K is referred to as the beam with. 
+
+    \cite{Beam:1} \cite{Beam:2} 
+
     \TODO{Add description}
 
     \subsection{Results}
@@ -49,7 +53,7 @@
     \begin{table}[htb]
 		\rowcolors{2}{gray!25}{white}
 		\begin{tabular}{lcccc}
-			Instance & LB & UB & Greedy Algorithm & Beam Search \\
+			Instance & LB & UB & Greedy & Beam Search \\
 			ESC07 & 2.125 & 2.125 & 2.700 & \\
 			ESC11 & 2.075 & 2.075 & 3.175 & \\
 			ESC12 & 1.675 & 1.675 & 2.034 & \\
@@ -85,7 +89,7 @@
 	\begin{table}[htb]
 		\rowcolors{2}{gray!25}{white}
 		\begin{tabular}{lcc}
-			Instance & Greedy Algorithm (in s) & Beam Search (in s) \\
+			Instance & Greedy (in s) & Beam Search (in s) \\
 			ESC07 & 0.000 & \\
 			ESC11 & 0.001 & \\
 			ESC12 & 0.001 & \\
