@@ -142,37 +142,46 @@ class DPSO:
         """
         return [self.node_start] + x + [self.node_end]
 
-    def optimize(self, iterations : int, verbose : bool = True) -> None:
+    def optimize(self, out_file : str, iterations : int, verbose : bool = True) -> None:
         """
         Runs Discrete Particle Swarm Optimization procedure
+        :param out_file: the file name to print the information to disk
         :param iterations: total number of iterations to run the algorithm for
         :param verbose: flag that indicates whether to print information to console
         :return:
         """
-        if verbose:
-            print(f'step {0:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
-
-        # parallelism updates gbest after all processes finish their job and might not be that optimal,
-        # but it saves some time
-        with mp.Pool(mp.cpu_count() - 1) as pool:
-            last_cost = np.inf
-            for it in range(1, iterations + 1):
-                mapping_params = list(zip(self.particles, self.velocities, self.pbest, [self.gbest] * self.pop_size))
-                mapping_results = pool.map(self._optimization_step, mapping_params)
-                self.particles, self.velocities, self.pbest, costs = map(list, zip(*mapping_results))
-
-                gbest_cost = self.cost(self.gbest)
-                for index, cost in enumerate(costs):
-                    if cost < gbest_cost:
-                        gbest_cost = cost
-                        self.gbest = deepcopy(self.particles[index])
-
-                if gbest_cost < last_cost:
-                    last_cost = gbest_cost
-                if verbose and it % 100 == 0:
-                    print(f'step {it:4d} / {iterations} file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}')
+        with open(out_file, mode='w', buffering=1) as w:
+            out_str = f'step {0:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}'
+            w.write(out_str + '\n')
             if verbose:
-                print(f'END file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}')
+                print(out_str)
+
+            # parallelism updates gbest after all processes finish their job and might not be that optimal,
+            # but it saves some time
+            with mp.Pool(mp.cpu_count() - 1) as pool:
+                last_cost = np.inf
+                for it in range(1, iterations + 1):
+                    mapping_params = list(zip(self.particles, self.velocities, self.pbest, [self.gbest] * self.pop_size))
+                    mapping_results = pool.map(self._optimization_step, mapping_params)
+                    self.particles, self.velocities, self.pbest, costs = map(list, zip(*mapping_results))
+
+                    gbest_cost = self.cost(self.gbest)
+                    for index, cost in enumerate(costs):
+                        if cost < gbest_cost:
+                            gbest_cost = cost
+                            self.gbest = deepcopy(self.particles[index])
+
+                    if gbest_cost < last_cost:
+                        last_cost = gbest_cost
+                    if it % 100 == 0:
+                        out_str = f'step {it:4d} / {iterations} file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}'
+                        w.write(out_str + '\n')
+                        if verbose:
+                            print(out_str)
+                out_str = f'END file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}'
+                w.write(out_str + '\n')
+                if verbose:
+                    print(out_str)
 
     def _optimization_step(self, param):
         """
