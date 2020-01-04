@@ -39,9 +39,7 @@
 
     \subsubsection{Beam Search Method}
 
-    The beam search heuristic is build a search tree by using breath-first search. At every level of the tree it generates all children of the current tree. Subsequently all paths besides the K best ones, with respect to the cost of the path, are trimmed. K is referred to as the beam with. 
-
-    \cite{Beam:1} \cite{Beam:2} 
+    The idea of beam search, in contrast to the greedy algorithm, is to build $K$ different solutions in parallel, where $K$ is called the beam width. For the SOP Problem the algorithms initializes all solutions path from the first node. It then finds all possible children of the nodes and computes the cost of the new paths. To maintain the beam width it selects the $K$ best new paths and repeats these steps until all nodes have been visited. \cite{Beam:1} \cite{Beam:2} 
 
     \TODO{Add description}
 
