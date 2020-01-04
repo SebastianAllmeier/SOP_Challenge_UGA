@@ -50,7 +50,7 @@
 
     \subsubsection{Beam Search Method}
 
-    The idea of beam search, in contrast to the greedy algorithm, is to build $K$ different solutions in parallel, where $K$ is called the beam width. For the SOP Problem the algorithms initializes all solutions path from the first node. It then finds all possible children of the nodes and computes the cost of the new paths. To maintain the beam width it selects the $K$ best new paths and repeats these steps until all nodes have been visited and the end vertex is reached. \cite{Beam:1} \cite{Beam:2} 
+    The idea of beam search, in contrast to the greedy algorithm, is to build $K$ different solutions in parallel, where $K$ is called the beam width. For the SOP Problem the algorithms initializes all solution paths from the initial node. It then finds all possible children of the node(s) and computes the cost of each of the new potential paths. To maintain the beam width it selects the $K$ best new paths and repeats these steps until all nodes have been visited and the end vertex has been reached. \cite{Beam:1} \cite{Beam:2} 
 
     \begin{figure}[hbt]
     	\includegraphics[]{files/beam_search.png}
