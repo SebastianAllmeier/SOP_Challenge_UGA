@@ -12,14 +12,25 @@
     \section{Remarks on the Tex file and TODOs}
 
     \begin{itemize}
-    	\item \TODO{add structure}
-    	\item \TODO{Write documentation}
-  		\item \TODO{Add references}
+    	\item \TODO{DPSO text and results}
+  		\item \TODO{write conclusion and comparison}
     \end{itemize}
 
     \section{SOP Problem}
 
-    
+    The Sequential Ordering Problem (SOP) is an asymmetrical TSP with precedence constraints. 
+
+    Each instance of this problem consists of a directed graph $G=(V, A)$, arc weights $w: A \rightarrow \mathbb{R}$, a set of precedence constraints $C \subset V \times V$ as well as a start vertex $s$ and destination vertex $t$.
+
+    The problem consists in finding a permutation of vertices starting at s, ending at t, which satisfy all precedence constraints and minimize the weighted sum of arcs connecting the vertices in the given order. \cite{libralesso2019tree}
+
+    \begin{figure}[hbt]
+    	\includegraphics[width=\textwidth]{files/graphic_sop_prob.png}
+    	\centering
+    	\caption{Illustrative example \cite{libralesso2019tree}}
+    \end{figure}
+
+
 
     \section{Solution approaches}
 
@@ -39,7 +50,13 @@
 
     \subsubsection{Beam Search Method}
 
-    The idea of beam search, in contrast to the greedy algorithm, is to build $K$ different solutions in parallel, where $K$ is called the beam width. For the SOP Problem the algorithms initializes all solutions path from the first node. It then finds all possible children of the nodes and computes the cost of the new paths. To maintain the beam width it selects the $K$ best new paths and repeats these steps until all nodes have been visited. \cite{Beam:1} \cite{Beam:2} 
+    The idea of beam search, in contrast to the greedy algorithm, is to build $K$ different solutions in parallel, where $K$ is called the beam width. For the SOP Problem the algorithms initializes all solutions path from the first node. It then finds all possible children of the nodes and computes the cost of the new paths. To maintain the beam width it selects the $K$ best new paths and repeats these steps until all nodes have been visited and the end vertex is reached. \cite{Beam:1} \cite{Beam:2} 
+
+    \begin{figure}[hbt]
+    	\includegraphics[]{files/beam_search.png}
+    	\centering
+    	\caption{Beam Search}
+    \end{figure}
 
     \TODO{Add description}
 
@@ -83,6 +100,8 @@
 		\caption{Results - Cost}
 		\label{table:results_cost}
 	\end{table}
+
+	\TODO{add some descriptive text}
 
 	\begin{table}[htb]
 		\rowcolors{2}{gray!25}{white}
