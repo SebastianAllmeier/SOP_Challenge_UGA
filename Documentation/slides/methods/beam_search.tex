@@ -6,21 +6,31 @@
 
 \begin{document}
 
-\begin{frame}{A sample slide}
+\begin{frame}{Beam Search}
 
-	\begin{block}{a sample block}
+	\begin{block}{General Idea}
 
-		sample text
+		\begin{itemize}
+
+			\item specify the beam width $K\in\mathbb{N}$
+			\item initialize one path containing the initial node
+			\item compute all children from the current paths (respecting precedence constraints)
+			\item select the K best ones
+			\item repeat until end node is reached (all nodes have been visited)
+
+		\end{itemize}
 
 	\end{block}
 
-	% sample to include an image
-	% \begin{figure}[htp]
-	% 	\centering
-	% 	\includegraphics[width=6cm]{images/faces_example.png}
-	% 	\caption{http://www.seas.ucla.edu/~vandenbe/ee236a/lectures/polyhedra.pdf}
-	% 	\label{fig:faces_example}
-	% \end{figure}
+\end{frame}
+
+\begin{frame}
+
+	\begin{figure}[htp]
+		\centering
+		\includegraphics[width=6cm]{images/beam_search.png}
+		\caption{Example of a beam search tree \cite{Beam:1}}
+	\end{figure}
 
 \end{frame}
 
