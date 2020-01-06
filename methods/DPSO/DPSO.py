@@ -1,11 +1,11 @@
 import math
 import random
 from random import uniform as U
-import time
 import numpy as np
 import multiprocessing as mp
 from typing import List
 from .operations import op_perm_sub_perm, op_scalar_mul_velocity, op_perm_sum_velocity, op_perm_fix
+from copy import deepcopy
 
 class DPSO:
     def __init__(self,
@@ -48,10 +48,11 @@ class DPSO:
         """
         Initializes particles, velocities, personal best and global best
         """
-
+        # initial velocities have lengths uniformly generated between n/2 and n/4
         lower_bound_velocity_size = math.floor(self.particle_size / 4.)
         upper_bound_velocity_size = math.floor(self.particle_size / 2.)
 
+        # initial velocities have displacements uniformly generated between -n/3 and n/3
         lower_bound_displacement = math.floor(-self.particle_size / 3.) # floor(- n / 3)
         upper_bound_displacement = math.floor(self.particle_size / 3.) # floor(+ n / 3)
 
@@ -67,15 +68,15 @@ class DPSO:
         # parallelize the creation of each particle because fixing procedure is quite slow
         with mp.Pool(processes=mp.cpu_count() - 1) as pool: # use max_cpu - 1 processes to avoid PC freezing
             param = (lower_bound_velocity_size, upper_bound_velocity_size, set_nodes, set_displacement, seed_perm)
-            mapping_params = [(i,) + param for i in range(self.pop_size)]
+            mapping_params = [(i,) + param for i in range(self.pop_size)] # (i,) is process number for random seed
             mapping_results = pool.map(self._create_single_particle, mapping_params)
             for velocity, particle, cost in mapping_results:
-                self.velocities.append(velocity)
-                self.particles.append(particle.copy())
-                self.pbest.append(particle.copy())
+                self.velocities.append(deepcopy(velocity))
+                self.particles.append(deepcopy(particle))
+                self.pbest.append(deepcopy(particle))
                 if self.gbest is None or cost < self.cost(self.gbest):
-                    self.gbest = particle.copy()
-        print('best:', self.gbest, self.cost(self.gbest))
+                    self.gbest = deepcopy(particle)
+        print('initial best:', self.gbest, self.cost(self.gbest))
 
     def _create_single_particle(self, params):
         """
@@ -83,7 +84,6 @@ class DPSO:
         :param params: a pair containing: index, lower_bound_velocity_size, upper_bound_velocity_size, set_nodes, set_displacement, seed_perm
         :return: a pair containing: velocity of particle, fixed particle, cost of particle
         """
-        time_start = time.time()
         index, lower_bound_velocity_size, upper_bound_velocity_size, set_nodes, set_displacement, seed_perm = params
 
         random.seed(index)
@@ -96,14 +96,11 @@ class DPSO:
         velocity = list(zip(nodes, displacements))
 
         unfixed_particle = op_perm_sum_velocity(x=seed_perm, v=velocity)
-        fixed_particle = op_perm_fix(x=unfixed_particle, P=self.precedences)
+        fixed_particle = op_perm_fix(x=self.full_particle(unfixed_particle), P=self.precedences)
         cost = self.cost(fixed_particle)
 
         # very important: have velocities that transform seed permutation into fixed one
         velocity = op_perm_sub_perm(fixed_particle, seed_perm)
-
-        time_end = time.time()
-        # print(f'creating particle {index} took {time_end - time_start:.4f} seconds')
 
         return velocity, fixed_particle, cost
 
@@ -119,7 +116,7 @@ class DPSO:
             for j in range(self.particle_size):
                 v = self.weights_matrix[i][j]
                 if v == -1: # create precedences
-                    self.precedences.append((j, i)) # j must precede i
+                    self.precedences.append((j, i)) # j must be visited before i
                 elif v > M: # determine start / end node
                     M = v
                     self.node_start, self.node_end = i, j
@@ -145,25 +142,21 @@ class DPSO:
         """
         return [self.node_start] + x + [self.node_end]
 
-    def optimize(self, iterations : int,
-                 parallelize : bool = False,
-                 verbose : bool = True,
-                 auto_adjust_social_coef : bool = True) -> None:
+    def optimize(self, out_file : str, iterations : int, verbose : bool = True) -> None:
         """
         Runs Discrete Particle Swarm Optimization procedure
+        :param out_file: the file name to print the information to disk
         :param iterations: total number of iterations to run the algorithm for
-        :param parallelize: flag that indicates whether to use multiprocessing
-        :param verbose: flag that indicates whether to prin information
-        :param auto_adjust_social_coef: apply formula social(k+1) = social(k) - 0.01 nr(k)
+        :param verbose: flag that indicates whether to print information to console
         :return:
         """
-        if auto_adjust_social_coef:
-            self.coef_social = 1
-        if verbose:
-            print(f'step {0:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
+        with open(out_file, mode='w', buffering=1) as w:
+            out_str = f'step {0:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}'
+            w.write(out_str + '\n')
+            if verbose:
+                print(out_str)
 
-        if parallelize:
-            # parallel version updates gbest after all processes finish their job and might not be that optimal,
+            # parallelism updates gbest after all processes finish their job and might not be that optimal,
             # but it saves some time
             with mp.Pool(mp.cpu_count() - 1) as pool:
                 last_cost = np.inf
@@ -176,38 +169,33 @@ class DPSO:
                     for index, cost in enumerate(costs):
                         if cost < gbest_cost:
                             gbest_cost = cost
-                            self.gbest = self.particles[index].copy()
+                            self.gbest = deepcopy(self.particles[index])
 
                     if gbest_cost < last_cost:
                         last_cost = gbest_cost
-                        # n = -2
-                        if auto_adjust_social_coef:
-                            n = sum([DPSO.lists_are_equal(particle, self.gbest) for particle in self.particles]) - 1 # !!!
-                            self.coef_social = self.coef_social - 0.01 * n #int(10 * n * U(0.5, 1))
-                            # TO DO: reset particles that are equal to gbest
+                    if it % 100 == 0:
+                        out_str = f'step {it:4d} / {iterations} file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}'
+                        w.write(out_str + '\n')
                         if verbose:
-                            print(f'step {it:4d}: n = {n:+5d} social = {self.coef_social:5.2f} file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}')
-        else:
-            # iterative version updates pbest and gbest as soon as a better particle is obtained (see that the update
-            # is made inside "for_i" loop)
-            for it in range(1, iterations + 1):
-                gbest_cost = self.cost(self.gbest)
-                for i in range(self.pop_size): # run optimization step for each particle
-                    param = (self.particles[i], self.velocities[i], self.pbest[i], self.gbest)
-                    self.particles[i], self.velocities[i], self.pbest[i], cost = self._optimization_step(param)
-                    # immediately update global best in case we got a better particle than previous best
-                    if cost < gbest_cost:
-                        gbest_cost = cost
-                        self.gbest = self.particles[i].copy()
+                            print(out_str)
+                out_str = f'END file = {self.file_name} best cost = {self.cost(self.gbest)} best perm = {self.full_particle(self.gbest)}'
+                w.write(out_str + '\n')
                 if verbose:
-                    print(f'step {it:4d}: best cost = {self.cost(self.gbest)}, best perm = {self.full_particle(self.gbest)}')
+                    print(out_str)
 
     def _optimization_step(self, param):
+        """
+        This method is run on a separate process at each iteration.
+        Applies the formula (*) - see it below - for one particle
+        :param param: contains particle, velocity, pbest and gbest, all needed to implement formula
+        :return: returns updated values for particle, velocity, pbest and gbest
+        """
         particle, velocity, pbest, gbest = param
         # save particle because we will compute velocity at the end
-        old_particle = particle.copy()
+        old_particle = deepcopy(particle)
+        old_particle = op_perm_fix(x=self.full_particle(old_particle),P=self.precedences)
 
-        # apply formula: v(k+1) = [inertia * v(k)] + [personal * rand() * (p(i) - x(i))] + [social * rand() * (g - x(i))]
+        # apply formula (*): v(k+1) = [inertia * v(k)] + [personal * rand() * (p(i) - x(i))] + [social * rand() * (g - x(i))]
 
         # compute each term inside square brackets
         velocity_inertia = op_scalar_mul_velocity(c=self.coef_inertia, v=velocity)
@@ -224,7 +212,7 @@ class DPSO:
         particle = op_perm_sum_velocity(particle, velocity_social)
 
         # fix current particle so that it repects precedence constraints
-        particle = op_perm_fix(x=particle, P=self.precedences)
+        particle = op_perm_fix(x=self.full_particle(particle), P=self.precedences)
 
         # compute velocity that transforms old_particle into self.patricles[i]
         velocity = op_perm_sub_perm(particle, old_particle)
@@ -233,12 +221,32 @@ class DPSO:
 
         # update personal best in case we got a better particle than previous personal best
         if cost < self.cost(pbest):
-            pbest = particle.copy()
+            pbest = deepcopy(particle)
+        if cost < self.cost(self.gbest):
+            self.gbest = deepcopy(particle)
 
         return particle, velocity, pbest, cost
 
+    def respects_precedences(self, particle):
+        """
+        Checks if the current particle respects precedence constraints
+        :param particle: the particle without start and end nodes
+        :return:
+        """
+        fp = self.full_particle(particle)
+        for i in range(len(fp) - 1):
+            if self.weights_matrix[fp[i]][fp[i+1]] < 0:
+                return False
+        return True
+
     @staticmethod
     def lists_are_equal(A, B):
+        """
+        Check if lists A and B are equal
+        :param A:
+        :param B:
+        :return:
+        """
         nA = len(A)
         nB = len(B)
         if nA != nB: return 0
