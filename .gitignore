@@ -105,3 +105,6 @@ venv.bak/
 
 # PyCharm files
 .idea
+
+# added by ionut
+Data/course_benchmark_instances/*
