@@ -6,23 +6,48 @@
 
 \begin{document}
 
-\begin{frame}{A sample slide}
-
-	\begin{block}{a sample block}
-
-		sample text
-
+\begin{frame}{Exact Method}
+	\begin{block}{Data}
+		\begin{tabular}{lll}
+			$V$ & : & Set of vertices.\\ 
+			$w_{ij}$ & : & Weight of the arc going from vertex $i$ to $j$.\\
+			$C$ & : & Set of precedence constraints.\\
+			& & If $(i,j) \in C$, $i$ must be visited before $j$.\\
+			$s$ & : & Start vertex.\\
+			$t$ & : & Destination vertex.
+		\end{tabular}
 	\end{block}
 
-	% sample to include an image
-	% \begin{figure}[htp]
-	% 	\centering
-	% 	\includegraphics[width=6cm]{images/faces_example.png}
-	% 	\caption{http://www.seas.ucla.edu/~vandenbe/ee236a/lectures/polyhedra.pdf}
-	% 	\label{fig:faces_example}
-	% \end{figure}
+	\begin{block}{Decision variables}
+	
+		$x_{ij} = \begin{cases}
+			1 & \text{if vertex } i \text{ is followed by } j\\
+			0 & \text{otherwise}
+		\end{cases}$\\
+	
+		$y_{ij}$ : Number of packages traveling from vertex $i$ to $j$.
+	\end{block}
 
+	\begin{block}{Objective function}
+		$$\min \sum_{i \in V}\sum_{j \in V} w_{ij} x{ij}$$
+	\end{block}
 \end{frame}
 
+\begin{frame}{Exact Method}
+	\begin{block}{Constraints}
+		$$\begin{array}{ll}
+			\displaystyle\sum_{j \in V} x_{ij} = 1, & \forall i \in V\\
+			\displaystyle\sum_{i \in V} x_{ij} = 1, & \forall j \in V\\
+			x_{ts} = 1 &\\
+			x_{ii} = 0, & \forall i \in V\\
+			\displaystyle\sum_{j \in V} y_{sj} = |V| - 1&\\
+			y_{ij} \le (|V| - 1) x_{ij}, & \forall i, j \in V\\
+			\displaystyle\sum_{j \in V} y_{ij} - \displaystyle\sum_{j \in V} y_{ji} = -1, & \forall i \in V\setminus\{s\}\\
+			\displaystyle\sum_{k \in V} y_{kj} - \displaystyle\sum_{k \in V} y_{ki} \ge 0, & \forall (i,j) \in C \mid i \ne s\\
+			x_{ij} \in \{0, 1\}, & \forall i,j \in V\\
+			y_{ij} \in \N, & \forall i,j \in V\\
+		\end{array}$$
+	\end{block}
+\end{frame}
 
 \end{document}
