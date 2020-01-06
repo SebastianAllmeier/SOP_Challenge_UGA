@@ -7,7 +7,7 @@ def greedy(arcs):
     defined by the specified matrix using a greedy algorithm.
 
     :param arcs: Matrix representation of the sequential ordering problem.
-    :return: List of vertices in order of visit for the solution found.
+    :return: Tuple of a list of vertices in order of visit for the solution found and the cost of that solution.
     """
     total_cost = 0
     visited_vertices = [0]
