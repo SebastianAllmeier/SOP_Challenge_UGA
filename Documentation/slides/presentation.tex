@@ -1,0 +1,31 @@
+\documentclass{beamer}
+\usetheme{Hannover}
+
+
+\input{preamble.tex}
+
+\begin{document}
+    \begin{frame}
+        \titlepage
+    \end{frame}
+    \begin{frame}
+        \frametitle{Structure}
+        \tableofcontents
+    \end{frame}
+
+    \section{Exact Method}
+    \import{methods/}{exact.tex}
+
+    \section{Greedy Method}
+    \import{methods/}{greedy.tex}
+
+    \section{Beam Search}
+    \import{methods/}{beam_search.tex}
+
+    \section{DPSO}
+    \import{methods/}{dpso.tex}
+
+    \section{Results}
+    \import{methods/}{results.tex}
+
+\end{document}
