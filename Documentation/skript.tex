@@ -28,11 +28,50 @@
     \section{Solution approaches}
 
     \subsection{Implemented methods}
+    
+    \subsubsection{Exact Method}
+    
+    For the exact method, we wrote the following integer linear program. In order to model the precedence constraints, we used packages which are generated at the start vertex and consumed by every other vertices.\\
+    
+    \textbf{Data:}\\
+    
+    \begin{tabular}{lll}
+	    $V$ & : & Set of vertices.\\ 
+	    $w_{ij}$ & : & Weight of the arc going from vertex $i$ to $j$.\\
+	    $C$ & : & Set of precedence constraints. If $(i,j) \in C$, $i$ must be visited before $j$.\\
+	    $s$ & : & Start vertex.\\
+	    $t$ & : & Destination vertex.
+	\end{tabular}\\
+    
+    \textbf{Decision variables:}\\
+    
+    $x_{ij} = \begin{cases}
+	    1 & \text{if vertex } i \text{ is followed by } j\\
+	    0 & \text{otherwise}
+    \end{cases}$\\
+    
+    $y_{ij}$ : Number of packages traveling from vertex $i$ to $j$.\\
+    
+    \textbf{Objective function:}
+    
+    $$\min \sum_{i \in V}\sum_{j \in V} w_{ij} x{ij}$$
+    
+    \textbf{Constraints:}
 
-    We have implemented multiple methods for solving the SOP Challenge namely an Exact Method and Particle Swarm Optimization Method as well as a 
-    Greedy Method and closely related variations of it. In the following we will discuss the latter methods since they have turned out to be the most 
-    stable methods in terms finding feasible solutions and computation time in our experiments. We will now give a short description of each of the 
-    methods. Tables with results for each of the methods can be found in \ref{results}.
+    $$\begin{array}{ll}
+        \displaystyle\sum_{j \in V} x_{ij} = 1, & \forall i \in V\\
+        \displaystyle\sum_{i \in V} x_{ij} = 1, & \forall j \in V\\
+        x_{ts} = 1 &\\
+        x_{ii} = 0, & \forall i \in V\\
+        \displaystyle\sum_{j \in V} y_{sj} = |V| - 1&\\
+        y_{ij} \le (|V| - 1) x_{ij}, & \forall i, j \in V\\
+        \displaystyle\sum_{j \in V} y_{ij} - \displaystyle\sum_{j \in V} y_{ji} = -1, & \forall i \in V\setminus\{s\}\\
+        \displaystyle\sum_{k \in V} y_{kj} - \displaystyle\sum_{k \in V} y_{ki} \ge 0, & \forall (i,j) \in C \mid i \ne s\\
+        x_{ij} \in \{0, 1\}, & \forall i,j \in V\\
+        y_{ij} \in \N, & \forall i,j \in V\\
+    \end{array}$$\\
+    
+    By running this ILP with the Gurobi solver, we were able to get optimal solutions for the smaller instances. However, the solving time quickly became too large for the bigger instances.
     
     \subsubsection{Discrete Particle Swarm Optimization (DPSO)}
     
@@ -66,10 +105,10 @@
 	that some problems are big, we could only use a small swarm size. For example, for big problems where $ n > 65 $, we could only use one swarm per 
 	CPU core. On the computer that we run the experiments on, we used 7 cores and finally had 7 particles to explore a big space. We remind that for 
 	big values of $ n $ the procedure of fixing the particle is very slow.
-	
+
     \subsubsection{Greedy Method}
 
-   	The first, simple heuristic we implemented was a greedy algorithm for the SOP Problem. The Greedy algorithm builds a solution starting from the initial node by choosing the the next best node in terms of cost and precedence constraints. As should be known the greedy algorithm makes local optimal decision which not always lead global optimal solutions. Furthermore the greedy algorithm was able to find feasible solutions for all instances quite fast and is easily implemented due to the local search criteria. \cite{Cormen2009} \\
+   	The first, simple heuristic we implemented was a greedy algorithm for the SOP Problem. The Greedy algorithm builds a solution starting from the initial node by choosing the the next best node in terms of cost and precedence constraints. As should be known, the greedy algorithm makes local optimal decision which does not always lead to global optimal solutions. Furthermore the greedy algorithm was able to find feasible solutions for all instances quite fast and is easily implemented due to the local search criteria. \cite{Cormen2009} \\
 
    	In the case of the SOP Problem the greedy algorithm starts the generation of the Hamiltonian path at the initial node. At each iteration of the 
    	algorithm we compute the set of unvisited nodes which do not violate the precedence constraints given by the instance. We then append the node 
@@ -80,22 +119,20 @@
 
     The idea of beam search, in contrast to the greedy algorithm, is to build $K$ different solutions in parallel, where $K$ is called the beam width. For the SOP Problem the algorithms initializes all solution paths from the initial node. It then finds all possible children of the node(s) and computes the cost of each of the new potential paths. To maintain the beam width it selects the $K$ best new paths and repeats these steps until all nodes have been visited and the end vertex has been reached. \cite{Beam:1} \cite{Beam:2} 
 
-    \begin{figure}[hbt]
+    \begin{figure}[H]
     	\includegraphics[]{files/beam_search.png}
     	\centering
     	\caption{Beam Search}
     \end{figure}
 
-    \TODO{Add description}
-
     \subsection{Results}
     \label{results}
 
-    The subsequent tables contain results for the used methods. The first table (\ref{table:results_cost}) displays the costs of the found solutions the second table (\ref{table:results_time}) the time needed to compute the solutions.
+    The subsequent tables contain results for the used methods. The first table (\ref{table:results_cost}) displays the best known upper and lower bounds (taken from the problem description file) and the costs of the found solutions. The second table (\ref{table:results_time}) displays the time needed to compute the solutions.
     
     BS10 refers to a beam search of width 10 and BSV to a beam search of width $|V|$.
 
-    \begin{table}[htb]
+	\begin{table}[H]
 		\rowcolors{2}{gray!25}{white}
 		\begin{tabular}{lcccccc}
 			Instance       & LB     &    UB      & DPSO   &   Greedy &   BS10   &   BSV   \\
@@ -130,10 +167,8 @@
 		\caption{Results - Cost}
 		\label{table:results_cost}
 	\end{table}
-
-	\TODO{add some descriptive text}
-
-	\begin{table}[htb]
+	
+	\begin{table}[H]
 		\rowcolors{2}{gray!25}{white}
 		\begin{tabular}{lcccc}
 			Instance      & DPSO           & Greedy (in s) & BS10 (in s) & BSV (in s)    \\
@@ -169,9 +204,11 @@
 		\label{table:results_time}
 	\end{table}
 
-
-
-
+	As we expected, the greedy method allowed us to compute solutions for every instance in a reasonable time. However, the cost of these solutions was often significantly higher than the best known upper bound.
+	
+	The beam search method then gave some better solutions for most instances while keeping the computation time reasonable when using a fixed width (10 in this case). On a few instances (like ESC12, R.600.1000.1 and R.700.1000.1), the results were worse than the ones from the greedy method. This can be explained by the fact that the search space is broader and better incomplete solutions could lead us away from the path taken by the greedy method. Due to the structure of some instances, the path taken by the greedy method could have worse incomplete solutions but lead to a better final solution.
+	
+	When using a variable beam width ($|V|$ in this case), the solutions found were better in many cases, but the computation time also increased significantly, especially on the bigger instances. This is why we did not compute results for all the instances.
 
 	% references
     \newpage
