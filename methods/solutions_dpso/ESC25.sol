@@ -1,5 +1,10 @@
 size: 27
 file: ESC25.sop
-best cost: 6518.0
-best solution: [0,18,17,22,2,10,7,9,1,6,16,11,24,14,5,25,3,19,13,15,8,20,21,23,12,4,26]
-elapsed: 0:30:28.051430
+best cost: 6567.0
+best solution: [0,20,21,8,4,18,1,16,11,14,13,19,15,6,12,2,3,10,5,17,22,23,7,9,24,25,26]
+elapsed: 0:07:51.672743
+pop_size = 35
+coef_inertia = 4.5
+coef_personal = 4.5
+coef_social = 2
+iterations = 5000
