@@ -54,7 +54,7 @@
     
     \textbf{Objective function:}
     
-    $$\min \sum_{i \in V}\sum_{j \in V} w_{ij} x{ij}$$
+    $$\min \sum_{i \in V}\sum_{j \in V} w_{ij} x_{ij}$$
     
     \textbf{Constraints:}
 
@@ -66,7 +66,7 @@
         \displaystyle\sum_{j \in V} y_{sj} = |V| - 1&\\
         y_{ij} \le (|V| - 1) x_{ij}, & \forall i, j \in V\\
         \displaystyle\sum_{j \in V} y_{ij} - \displaystyle\sum_{j \in V} y_{ji} = -1, & \forall i \in V\setminus\{s\}\\
-        \displaystyle\sum_{k \in V} y_{kj} - \displaystyle\sum_{k \in V} y_{ki} \ge 0, & \forall (i,j) \in C \mid i \ne s\\
+        \displaystyle\sum_{k \in V} y_{ki} - \displaystyle\sum_{k \in V} y_{kj} \ge 0, & \forall (i,j) \in C \mid i \ne s\\
         x_{ij} \in \{0, 1\}, & \forall i,j \in V\\
         y_{ij} \in \N, & \forall i,j \in V\\
     \end{array}$$\\
