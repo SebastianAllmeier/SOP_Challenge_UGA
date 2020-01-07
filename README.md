@@ -3,13 +3,15 @@
 
 **Autors**: Sebastian, Felix, Ionut
 
-This README provides all necessary information to obtain results from our solution methods (Exact Method, Greedy Method, Particle Swarm Method). Within the respective sections all requirements to use the methods (such as used solvers) and an instruction on how to run the methods is given. Solutions for the methods can be retrieved in the their respective .sol files. The location of these files is given within the decription of the methods.
-
-Find the table of results in the table_of_results.md file within this repository or klick on the link below.
+This README provides all necessary information to obtain results from our solution methods (Exact Method, Greedy Method, Beam Search Method, Particle Swarm Method). Within the respective sections all requirements to use the methods (such as used solvers) and an instruction on how to run the methods is given. Solutions for the methods can be retrieved in the their respective .sol files. The location of these files is given within the decription of the methods.
 
 ------------------------------------------
 
-**Table of results**: [link](table_of_results.md)
+[**Table of results**](table_of_results.md)
+
+[**Report**](Documentation/Report_Ionut_Felix_Sebastian.pdf)
+
+[**Presentation**](Documentation/slides/presentation.pdf)
 
 ------------------------------------------
 
@@ -64,6 +66,17 @@ Find the table of results in the table_of_results.md file within this repository
 * To run the greedy method run the forementioned file.
 * The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `greedy_method.py` is run. 
 * The method saves .sol files in the `methods/solutions_greedy_method` folder.
+  * The solution folder contains .sol files which have the same formatting as the .sol files given to us in the beginning of the lecture.
+------------------------------------------
+
+## Beam Search Method
+
+### How to use the method & where to find files
+
+* The beam search method can be found in `methods/beam_search_method.py`.
+* To run the beam search method run the forementioned file.
+* The file `parser.py` includes a list of files which will be parsed looking like `names = ['ESC07', 'ESC11', 'ESC12', 'ESC25', ...              'ry48p.4']`. This array specifies the instances for which the exact method will be used if `beam_search_method.py` is run. 
+* The method saves .sol files in the `methods/solutions_beam_search_method` folder.
   * The solution folder contains .sol files which have the same formatting as the .sol files given to us in the beginning of the lecture.
 ------------------------------------------
 
